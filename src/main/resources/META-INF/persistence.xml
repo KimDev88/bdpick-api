@@ -1,0 +1,75 @@
+***REMOVED***
+***REMOVED***
+***REMOVED***
+***REMOVED***
+
+<persistence-unit name="postgresql-example">
+***REMOVED***
+
+        <class>org.hibernate.reactive.example.session.Author</class>
+        <class>org.hibernate.reactive.example.session.Book</class>
+
+***REMOVED***
+
+***REMOVED*** PostgreSQL -->
+            <property name="jakarta.persistence.jdbc.url"
+                      value="jdbc:postgresql://localhost/hreact"/>
+
+***REMOVED*** Credentials -->
+            <property name="jakarta.persistence.jdbc.user"
+                      value="hreact"/>
+            <property name="jakarta.persistence.jdbc.password"
+                      value="hreact"/>
+
+***REMOVED***
+            <property name="hibernate.connection.pool_size"
+                      value="10"/>
+
+***REMOVED***
+***REMOVED***
+                      value="drop-and-create"/>
+
+***REMOVED***
+***REMOVED***
+***REMOVED***
+            <property name="hibernate.highlight_sql" value="true"/>
+
+***REMOVED***
+
+***REMOVED***
+
+    <persistence-unit name="mysql-example">
+***REMOVED***
+
+        <class>org.hibernate.reactive.example.session.Author</class>
+        <class>org.hibernate.reactive.example.session.Book</class>
+
+***REMOVED***
+
+***REMOVED*** MySQL -->
+            <property name="jakarta.persistence.jdbc.url"
+                      value="jdbc:mysql://localhost/hreact"/>
+
+***REMOVED*** Credentials -->
+            <property name="jakarta.persistence.jdbc.user"
+                      value="hreact"/>
+            <property name="jakarta.persistence.jdbc.password"
+                      value="hreact"/>
+
+***REMOVED***
+            <property name="hibernate.connection.pool_size"
+                      value="10"/>
+
+***REMOVED***
+***REMOVED***
+                      value="drop-and-create"/>
+
+***REMOVED***
+***REMOVED***
+***REMOVED***property name="hibernate.show_sql" value="true"/-->
+
+***REMOVED***
+
+***REMOVED***
+
+***REMOVED***
