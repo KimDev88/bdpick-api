@@ -1,0 +1,77 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.7.12'
+    id 'io.spring.dependency-management' version '1.1.0'
+    id 'org.asciidoctor.jvm.convert' version '3.3.2'
+}
+
+group = 'com.bdpick'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    set('snippetsDir', file("build/generated-snippets"))
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-webtestclient'
+
+//    implementation 'com.oracle.database.r2dbc:oracle-r2dbc:1.1.1'
+    implementation 'com.oracle.database.r2dbc:oracle-r2dbc:0.4.0'
+//    implementation 'com.oracle.database.jdbc:ojdbc11:21.7.0.0'
+    implementation 'dev.snowdrop:vertx-spring-boot-starter-mail:1.4.1'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'commons-io:commons-io:2.13.0'
+
+//    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // jwt
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // or 'io.jsonwebtoken:jjwt-gson:JJWT_RELEASE_VERSION' for gson
+
+//    implementation 'com.oracle.oci.sdk:oci-java-sdk-bom:3.18.0'
+//    implementation 'com.oracle.oci.sdk:oci-java-sdk-common:3.18.0'
+//    implementation 'com.oracle.oci.sdk:oci-java-sdk-objectstorage:3.18.0'
+//    implementation 'com.oracle.oci.sdk:oci-java-sdk-common-httpclient:3.18.0'
+//    implementation 'com.oracle.oci.sdk:oci-java-sdk-common-httpclient-jersey:3.18.0'
+    implementation 'com.oracle.oci.sdk:oci-java-sdk-shaded-full:3.18.0'
+
+
+
+
+
+
+    // test
+//    implementation 'org.hibernate.reactive:hibernate-reactive-core:2.0.1.Final'
+//    implementation 'io.vertx:vertx-oracle-client:4.2.7'
+
+
+}
+
+tasks.named('test') {
+    outputs.dir snippetsDir
+    useJUnitPlatform()
+}
+
+tasks.named('asciidoctor') {
+    inputs.dir snippetsDir
+    dependsOn test
+}
