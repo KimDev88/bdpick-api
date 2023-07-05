@@ -50,4 +50,9 @@ public class CommonResponse implements Serializable {
         this.data = data;
         return this;
     }
+
+    public CommonResponse setCode(String code) {
+        this.code = code;
+        return this;
+    }
 }

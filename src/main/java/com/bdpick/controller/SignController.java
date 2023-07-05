@@ -1,26 +1,27 @@
 package com.bdpick.controller;
 
-//import com.bdpick.common.security.JwtService;
-
 import com.bdpick.common.security.JwtService;
+import com.bdpick.domain.Device;
 import com.bdpick.domain.Token;
 import com.bdpick.domain.User;
 import com.bdpick.domain.Verify;
 import com.bdpick.domain.request.CommonResponse;
+import com.bdpick.domain.request.ResponseCode;
+import com.bdpick.repository.DeviceRepository;
 import com.bdpick.repository.UserRepository;
 import com.bdpick.repository.VerifyRepository;
 import dev.snowdrop.vertx.mail.MailClient;
 import dev.snowdrop.vertx.mail.SimpleMailMessage;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 
@@ -30,6 +31,7 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 public class SignController {
     private final UserRepository userRepository;
     private final VerifyRepository verifyRepository;
+    private final DeviceRepository deviceRepository;
 
     private final JwtService jwtService;
     private final MailClient mailClient;
@@ -43,9 +45,10 @@ public class SignController {
                 .hasElement();
     }
 
-    public SignController(UserRepository userRepository, VerifyRepository verifyRepository, JwtService jwtService, MailClient mailClient) {
+    public SignController(UserRepository userRepository, VerifyRepository verifyRepository, DeviceRepository deviceRepository, JwtService jwtService, MailClient mailClient) {
         this.userRepository = userRepository;
         this.verifyRepository = verifyRepository;
+        this.deviceRepository = deviceRepository;
         this.jwtService = jwtService;
         this.mailClient = mailClient;
     }
@@ -75,10 +78,13 @@ public class SignController {
     @Transactional
     public Mono<CommonResponse> in(@RequestBody User user) {
         CommonResponse response = new CommonResponse();
-        String id = user.getId();
+        String userId = user.getId();
         String password = user.getPassword();
+        String uuid = user.getUuid();
+        AtomicReference<Long> deviceId = new AtomicReference<>();
+        AtomicReference<String> refreshToken = new AtomicReference<>();
 
-        return userRepository.findById(id)
+        return userRepository.findById(userId)
                 .defaultIfEmpty(new User())
                 .<User>handle((existedUser, sink) -> {
                     if (existedUser.getId() == null) {
@@ -87,18 +93,39 @@ public class SignController {
                     } else if (!Objects.equals(existedUser.getPassword(), password)) {
                         sink.error(new RuntimeException(ERROR_NOT_CORRECT));
                     } else {
-                        String accessToken = jwtService.createAccessToken(id);
-                        String refreshToken = jwtService.createRefreshToken();
-                        Token token = new Token(accessToken, refreshToken);
+                        String accessToken = jwtService.createAccessToken(userId);
+                        refreshToken.set(jwtService.createRefreshToken());
+                        Token token = new Token(accessToken, refreshToken.get());
                         Map<String, Object> resultMap = new HashMap<>();
                         resultMap.put("token", token);
                         resultMap.put("userType", existedUser.getType());
                         response.setData(resultMap);
-                        existedUser.setToken(refreshToken);
                         sink.next(existedUser);
                     }
                 })
                 .flatMap(userRepository::save)
+                .then(deviceRepository.findDeviceByUserIdAndUuid(userId, uuid))
+                .doOnNext(device -> deviceId.set(device.getId()))
+                .hasElement()
+                .flatMap(aBoolean ->
+                {
+                    // 데이터 존재하지 않을 경우 시퀀스 생성
+                    if (!aBoolean) {
+                        return deviceRepository.getSequence().zipWith(Mono.just(true));
+                    } else return Mono.just(deviceId.get()).zipWith(Mono.just(false));
+                    // 데이터 존재할 경우
+                })
+                .flatMap(objects -> {
+                    Long id = objects.getT1();
+                    Device device = new Device();
+                    device.setNew(objects.getT2());
+                    device.setId(id);
+                    device.setUserId(userId);
+                    device.setUuid(uuid);
+                    device.setRefreshToken(refreshToken.get());
+                    device.setCreatedAt(LocalDateTime.now());
+                    return deviceRepository.save(device);
+                })
                 .then(Mono.just(response))
                 .onErrorResume(throwable -> {
                     log.error("error : ", throwable);
@@ -189,6 +216,43 @@ public class SignController {
                         verify1 -> verify1.getCode().equals(verify.getCode()) && verify1.getCreatedAt().isAfter(localDateTime)
                 ).map(CommonResponse::new);
 
+    }
+
+    @PostMapping("renew")
+    public Mono<CommonResponse> renewToken(@RequestBody Token token) {
+        CommonResponse response = new CommonResponse();
+        String refreshToken = token.getRefreshToken();
+        String accessToken = token.getAccessToken();
+        AtomicReference<String> uuid = new AtomicReference<>();
+        String userId = jwtService.getUserIdByToken(accessToken);
+
+        try {
+            jwtService.verifyToken(refreshToken);
+            return deviceRepository.findDeviceByUserIdAndRefreshToken(userId, refreshToken)
+                    .doOnNext(device -> uuid.set(device.getUuid()))
+                    .hasElement()
+                    .flatMap(isExist -> {
+                        if (isExist) {
+                            return userRepository.findById(userId);
+                        } else {
+                            return Mono.error(new RuntimeException("TOKEN_IS_NOT_CORRECT"));
+                        }
+                    })
+                    .flatMap(user -> {
+                        user.setUuid(uuid.get());
+                        return this.in(user);
+                    });
+        } catch (Exception e) {
+            log.error("error : ", e);
+            // JWT 만료 시
+            if (e instanceof ExpiredJwtException) {
+                response.setError().setCode(ResponseCode.CODE_UNAUTHORIZED);
+            } else {
+                response.setError();
+            }
+
+        }
+        return Mono.just(response);
     }
 
 }
