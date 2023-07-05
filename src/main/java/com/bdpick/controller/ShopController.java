@@ -1,7 +1,6 @@
 package com.bdpick.controller;
 
 import com.bdpick.common.BdUtil;
-import com.bdpick.common.OciService;
 import com.bdpick.common.security.JwtService;
 import com.bdpick.domain.BdFile;
 import com.bdpick.domain.FileType;
@@ -24,8 +23,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.context.Context;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -46,15 +48,16 @@ public class ShopController {
     @Value("${openapi.token}")
     String openApiToken;
 
-    final private OciService ociService;
+    @Value("${upload-path}")
+    String uploadPath;
+
     final private ShopRepository shopRepository;
     final private ShopImageRepository shopImageRepository;
     final private FileRepository fileRepository;
     final JwtService jwtService;
     private final String ERROR_NAME_DUPLICATE_REGISTER = "DuplicateNumber";
 
-    public ShopController(OciService ociService, ShopRepository shopRepository, ShopImageRepository shopImageRepository, FileRepository fileRepository, JwtService jwtService) {
-        this.ociService = ociService;
+    public ShopController(ShopRepository shopRepository, ShopImageRepository shopImageRepository, FileRepository fileRepository, JwtService jwtService) {
         this.shopRepository = shopRepository;
         this.shopImageRepository = shopImageRepository;
         this.fileRepository = fileRepository;
@@ -63,7 +66,6 @@ public class ShopController {
 
     @GetMapping("this")
     public Mono<CommonResponse> selectMyShop(@RequestHeader Map<String, Object> map) {
-        CommonResponse response = new CommonResponse();
         String token = BdUtil.getTokenByHeader(map);
         String userId = jwtService.getUserIdByToken(token);
         return shopRepository.findShopByUserId(userId)
@@ -133,10 +135,37 @@ public class ShopController {
                 });
     }
 
+    @PostMapping(value = "fileUpload", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public Mono<CommonResponse> fileUpload(@RequestPart(value = "file", required = false) Mono<FilePart> filePart, @RequestPart(value = "directory", required = false) String fileType) {
+        CommonResponse response = new CommonResponse();
+        String url = "http://152.69.231.150/images/";
+
+        return filePart
+                .publishOn(Schedulers.boundedElastic())
+                .handle((part, sink) -> {
+                    String fileName = part.filename();
+                    Path path = Path.of(uploadPath, fileType);
+                    if (!Files.exists(path)) {
+                        try {
+                            Files.createDirectories(path);
+
+                        } catch (IOException e) {
+                            sink.error(new RuntimeException(e));
+                            return;
+                        }
+                    }
+                    Path resolve = path.resolve(part.filename());
+                    part.transferTo(resolve).subscribe();
+                    response.setData(url + fileType + "/" + fileName);
+                    sink.next(response);
+                });
+    }
+
     @Transactional
     @PostMapping
     public Mono<CommonResponse> createShop(@RequestHeader Map<String, Object> headerMap,
                                            @RequestPart("files") Flux<FilePart> files, @RequestPart("fileTypes") Flux<String> filesTypes, Shop shop) {
+
         String userId = jwtService.getUserIdByHeaderMap(headerMap);
         // 매장 정보 저장
         Mono<Long> shopIdMono = shopRepository.getSequence()
@@ -149,7 +178,8 @@ public class ShopController {
                     shop.setAddressId(0L);
                     return shopRepository.save(shop);
                 })
-                .mapNotNull(Shop::getId).cache();
+                .mapNotNull(Shop::getId)
+                .cache();
 
         // 오라클 업로드
         return shopRepository.findShopByRegistNumber(StringUtils.rightPad(shop.getRegistNumber(), 10))
@@ -163,7 +193,8 @@ public class ShopController {
                 .flatMap(objects -> {
                     FilePart filePart = objects.getT1();
                     String fileType = objects.getT2();
-                    return ociService.uploadFile(filePart, fileType, "shop");
+//                    return ociService.uploadFile(filePart, fileType, "shop");
+                    return BdUtil.uploadFile(filePart, fileType, "images");
                 })
                 .zipWith(fileRepository.getSequence().repeat())
                 .map(objects -> {
@@ -210,8 +241,7 @@ public class ShopController {
                         }
                     } else return Mono.error(throwable);
                     return Mono.error(throwable);
-                });
-//                .onErrorReturn(new CommonResponse(ResponseCode.CODE_ERROR, ResponseCode.MESSAGE_ERROR, false));
-
+                })
+                .onErrorReturn(new CommonResponse(ResponseCode.CODE_ERROR, ResponseCode.MESSAGE_ERROR, false));
     }
 }

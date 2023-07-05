@@ -2,6 +2,7 @@ package com.bdpick.common.security;
 
 import com.bdpick.common.BdUtil;
 import com.bdpick.enums.TokenType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -20,6 +21,7 @@ import java.util.Objects;
 @Log4j2
 public class JwtService {
     private final Key secretKey;
+
     public JwtService(@Value("${jwtSecretKey}") String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
@@ -34,11 +36,11 @@ public class JwtService {
         }
     }
 
-     public String createAccessToken(String userId) {
+    public String createAccessToken(String userId) {
         return createToken(TokenType.A, userId);
     }
 
-     public String createRefreshToken() {
+    public String createRefreshToken() {
         return createToken(TokenType.R, null);
     }
 
@@ -48,12 +50,11 @@ public class JwtService {
         LocalDateTime time = LocalDateTime.now();
         switch (type) {
             case A:
-//                time = time.plusMinutes(5);
-                time = time.plusMinutes(50);
+                time = time.plusMinutes(5);
                 claims.put("id", id);
                 break;
-            case R :
-                time = time.plusDays(1);
+            case R:
+                time = time.plusDays(5);
                 break;
         }
         Date expiredDate = Date.from(time.atZone(ZoneId.systemDefault()).toInstant());
@@ -70,26 +71,43 @@ public class JwtService {
                 .compact();
         return jws;
     }
-public Jws<Claims> verifyToken(String token) {
+
+    public Jws<Claims> verifyToken(String token) {
         try {
             JwtParser parser = Jwts.parserBuilder().setSigningKey(secretKey).build();
             Jws<Claims> claimsJws = parser.parseClaimsJws(token);
+
             TokenType tokenType = TokenType.valueOf(claimsJws.getBody().getSubject());
             return claimsJws;
         } catch (ExpiredJwtException e) {
             log.error("expired", e);
+            throw e;
         } catch (PrematureJwtException e) {
             log.error("not yet", e);
+            throw e;
         } catch (Exception e) {
             log.error("exception", e);
+            throw e;
         }
-        return null;
     }
 
-     public String getUserIdByToken(String token) {
-        return Objects.requireNonNull(verifyToken(token))
-                .getBody()
-                .get("id", String.class);
+    public String getUserIdByToken(String token) {
+//        return Objects.requireNonNull(verifyToken(token))
+//                .getBody()
+//                .get("id", String.class);
+
+        String[] tokens = token.split("\\.");
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            Map<String, Object> map = objectMapper.readValue(Decoders.BASE64URL.decode(tokens[1]), Map.class);
+            if (map.containsKey("id")) {
+                return (String) map.get("id");
+            }
+        } catch (Exception e) {
+            log.error("error : ", e);
+            return null;
+        }
+        return null;
     }
 
     public String getUserIdByHeaderMap(Map<String, Object> headerMap) {

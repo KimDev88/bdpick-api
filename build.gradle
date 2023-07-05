@@ -35,12 +35,11 @@ dependencies {
 
 //    implementation 'com.oracle.database.r2dbc:oracle-r2dbc:1.1.1'
     implementation 'com.oracle.database.r2dbc:oracle-r2dbc:0.4.0'
-//    implementation 'com.oracle.database.jdbc:ojdbc11:21.7.0.0'
     implementation 'dev.snowdrop:vertx-spring-boot-starter-mail:1.4.1'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'commons-io:commons-io:2.13.0'
 
-//    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 
     // jwt
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
@@ -52,7 +51,7 @@ dependencies {
 //    implementation 'com.oracle.oci.sdk:oci-java-sdk-objectstorage:3.18.0'
 //    implementation 'com.oracle.oci.sdk:oci-java-sdk-common-httpclient:3.18.0'
 //    implementation 'com.oracle.oci.sdk:oci-java-sdk-common-httpclient-jersey:3.18.0'
-    implementation 'com.oracle.oci.sdk:oci-java-sdk-shaded-full:3.18.0'
+//    implementation 'com.oracle.oci.sdk:oci-java-sdk-shaded-full:3.18.0'
 
 
 
