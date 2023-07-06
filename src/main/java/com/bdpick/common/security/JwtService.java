@@ -1,7 +1,9 @@
 package com.bdpick.common.security;
 
 import com.bdpick.common.BdUtil;
+import com.bdpick.domain.Shop;
 import com.bdpick.enums.TokenType;
+import com.bdpick.repository.ShopRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -21,8 +23,10 @@ import java.util.Objects;
 @Log4j2
 public class JwtService {
     private final Key secretKey;
+    private final ShopRepository shopRepository;
 
-    public JwtService(@Value("${jwtSecretKey}") String secretKey) {
+    public JwtService(@Value("${jwtSecretKey}") String secretKey, ShopRepository shopRepository) {
+        this.shopRepository = shopRepository;
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
@@ -114,5 +118,11 @@ public class JwtService {
         return Objects.requireNonNull(verifyToken(BdUtil.getTokenByHeader(headerMap)))
                 .getBody()
                 .get("id", String.class);
+    }
+
+    public Long getShopIdByUserId(String userId) {
+        return shopRepository.findShopByUserId(userId)
+                .mapNotNull(Shop::getId).block();
+
     }
 }
