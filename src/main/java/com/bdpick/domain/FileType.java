@@ -5,5 +5,8 @@ public enum FileType {
     S1,
     S2,
     S3,
-    S4
+    S4,
+
+    // AD
+    A1
 }

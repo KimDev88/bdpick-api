@@ -164,7 +164,9 @@ public class ShopController {
     @Transactional
     @PostMapping
     public Mono<CommonResponse> createShop(@RequestHeader Map<String, Object> headerMap,
-                                           @RequestPart("files") Flux<FilePart> files, @RequestPart("fileTypes") Flux<String> filesTypes, Shop shop) {
+                                           @RequestPart("files") Flux<FilePart> files,
+                                           @RequestPart("fileTypes") Flux<String> filesTypes,
+                                           @RequestPart("shop")Shop shop) {
 
         String userId = jwtService.getUserIdByHeaderMap(headerMap);
         // 매장 정보 저장
