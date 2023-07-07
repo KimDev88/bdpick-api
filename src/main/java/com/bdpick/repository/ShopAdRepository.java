@@ -11,4 +11,7 @@ public interface ShopAdRepository extends ReactiveCrudRepository<ShopAd, Long> {
 
     @Query("SELECT SEQ_SHOP_AD.nextval FROM DUAL")
     Mono<Long> getSequence();
+
+    @Override
+    Mono<ShopAd> findById(Long aLong);
 }

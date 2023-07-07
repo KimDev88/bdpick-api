@@ -10,6 +10,8 @@ import com.bdpick.domain.advertisement.ShopAd;
 import com.bdpick.domain.keyword.Keyword;
 import com.bdpick.domain.request.CommonResponse;
 import com.bdpick.repository.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,26 +30,45 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 //@RequestMapping(value = PREFIX_API_URL + "/shop-ad", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
 @RequestMapping(value = PREFIX_API_URL + "/shop-ads")
 
+@RequiredArgsConstructor
 public class ShopAdController {
     private final ShopAdRepository shopAdRepository;
+    private final ShopAdDtoRepository shopAdDtoRepository;
     private final ShopImageRepository shopImageRepository;
     private final KeywordRepository keywordRepository;
     private final AdKeywordRepository adKeywordRepository;
     private final FileRepository fileRepository;
     private final JwtService jwtService;
+    private final R2dbcEntityTemplate template;
 
-    public ShopAdController(ShopAdRepository shopAdRepository, ShopImageRepository shopImageRepository, KeywordRepository keywordRepository, AdKeywordRepository adKeywordRepository, FileRepository fileRepository, JwtService jwtService) {
-        this.shopAdRepository = shopAdRepository;
-        this.shopImageRepository = shopImageRepository;
-        this.keywordRepository = keywordRepository;
-        this.adKeywordRepository = adKeywordRepository;
-        this.fileRepository = fileRepository;
-        this.jwtService = jwtService;
+    @GetMapping
+    public Mono<CommonResponse> selectShopAds() {
+
+
+        return template.getDatabaseClient().sql("""
+                        SELECT SA.*, SI.ID AS IMAGE_ID, "FILE".ID AS FILE_ID, "FILE".URI
+                        FROM SHOP_AD SA
+                                 JOIN SHOP_IMAGE SI on SA.SHOP_ID = SI.SHOP_ID AND SI.TYPE LIKE 'A%'
+                                 JOIN "FILE" ON SI.FILE_ID = "FILE".ID
+                                 LEFT JOIN AD_KEYWORD AK on SA.ID = AK.AD_ID
+                                JOIN KEYWORD K on AK.KEYWORD_ID = K.ID""")
+                .fetch().all()
+                .map(stringObjectMap -> {
+                    System.out.println("stringObjectMap = " + stringObjectMap);
+                    return stringObjectMap;
+                })
+                .then(Mono.just(new CommonResponse()));
+
+//        return shopAdDtoRepository.findShopAdDtosByShopIdIsNotNullOrderByCreatedAtDesc()
+//                .map(shopAdDto -> {
+//                    return shopAdDto;
+//                }).then(Mono.just(new CommonResponse()));
+
     }
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @Transactional
-    public Mono<CommonResponse> createShopAd(@RequestHeader Map<String, Object> header,
+    public Mono<CommonResponse> createShopAd(@RequestHeader Map<String, Object> headerMap,
                                              @RequestPart("files") Flux<FilePart> filePartFlux,
                                              @RequestPart("fileTypes") Flux<String> typeFlux,
                                              @RequestPart("shop") ShopAd shopAd) {
@@ -134,7 +155,7 @@ public class ShopAdController {
                     adKeyword.setCreatedAt(LocalDateTime.now());
                     return adKeywordRepository.save(adKeyword);
                 })
-                .contextWrite(context -> context.put("shopId", jwtService.getShopIdByUserId(jwtService.getUserIdByHeaderMap(header))))
+                .contextWrite(context -> context.put("shopId", jwtService.getShopIdByHeaderMap(headerMap)))
                 .then(Mono.just(response));
 
     }
