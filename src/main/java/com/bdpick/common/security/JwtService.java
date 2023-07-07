@@ -31,14 +31,14 @@ public class JwtService {
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public Boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
-            return true;
-        } catch (Exception e) {
-            throw new RuntimeException("인증 실패");
-        }
-    }
+//    public Boolean validateToken(String token) {
+//        try {
+//            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+//            return true;
+//        } catch (Exception e) {
+//            throw new RuntimeException("인증 실패");
+//        }
+//    }
 
     public String createAccessToken(String userId) {
         return createToken(TokenType.A, userId);
@@ -54,7 +54,8 @@ public class JwtService {
         LocalDateTime time = LocalDateTime.now();
         switch (type) {
             case A:
-                time = time.plusMinutes(5);
+//                time = time.plusMinutes(5);
+                time = time.plusYears(1);
                 claims.put("id", id);
                 break;
             case R:
@@ -123,6 +124,10 @@ public class JwtService {
     public Long getShopIdByUserId(String userId) {
         return shopRepository.findShopByUserId(userId)
                 .mapNotNull(Shop::getId).block();
-
     }
+
+    public Long getShopIdByHeaderMap(Map<String, Object> headerMap) {
+        return getShopIdByUserId(getUserIdByHeaderMap(headerMap));
+    }
+
 }

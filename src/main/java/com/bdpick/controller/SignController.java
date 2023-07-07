@@ -1,5 +1,6 @@
 package com.bdpick.controller;
 
+import com.bdpick.common.MailService;
 import com.bdpick.common.security.JwtService;
 import com.bdpick.domain.Device;
 import com.bdpick.domain.Token;
@@ -10,9 +11,8 @@ import com.bdpick.domain.request.ResponseCode;
 import com.bdpick.repository.DeviceRepository;
 import com.bdpick.repository.UserRepository;
 import com.bdpick.repository.VerifyRepository;
-import dev.snowdrop.vertx.mail.MailClient;
-import dev.snowdrop.vertx.mail.SimpleMailMessage;
 import io.jsonwebtoken.ExpiredJwtException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,15 +26,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 
 @Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping(PREFIX_API_URL + "/sign")
 public class SignController {
     private final UserRepository userRepository;
     private final VerifyRepository verifyRepository;
     private final DeviceRepository deviceRepository;
-
     private final JwtService jwtService;
-    private final MailClient mailClient;
+    private final MailService mailService;
+
 
     static private final String ERROR_NO_USER = "NO_USER";
     static private final String ERROR_NOT_CORRECT = "NOT_CORRECT";
@@ -45,13 +46,6 @@ public class SignController {
                 .hasElement();
     }
 
-    public SignController(UserRepository userRepository, VerifyRepository verifyRepository, DeviceRepository deviceRepository, JwtService jwtService, MailClient mailClient) {
-        this.userRepository = userRepository;
-        this.verifyRepository = verifyRepository;
-        this.deviceRepository = deviceRepository;
-        this.jwtService = jwtService;
-        this.mailClient = mailClient;
-    }
 
     @PostMapping("up")
     @Transactional
@@ -166,7 +160,7 @@ public class SignController {
     }
 
     @Transactional
-    @PostMapping("send-mail")
+    @PostMapping("/send-mail")
     public Mono<CommonResponse> sendMail(@RequestBody User user) {
         CommonResponse response = new CommonResponse();
         String email = Optional.of(user.getEmail()).orElseThrow(NoSuchFieldError::new);
@@ -187,12 +181,9 @@ public class SignController {
                             .hasElement()
                             .map(CommonResponse::new);
                 }))
-                .doFinally((signalType) -> {
-                    mailClient.send(new SimpleMailMessage()
-                            .setFrom("no-reply@bdpick.com")
-                            .setTo(List.of(email))
-                            .setSubject("BDPICK 인증번호")
-                            .setText(code)).subscribe();
+                .doOnNext(s -> {
+                    mailService.sendMail(List.of(email), "BDPICK 인증번호", code);
+
                 })
                 .onErrorResume(throwable -> {
                             log.error("error : ", throwable);
@@ -202,7 +193,6 @@ public class SignController {
                             throw new RuntimeException(throwable);
                         }
                 );
-
 
     }
 
