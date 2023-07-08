@@ -11,4 +11,6 @@ public interface AdKeywordRepository extends ReactiveCrudRepository<AdKeyword, L
 
     @Query("SELECT SEQ_AD_KEYWORD.nextval FROM DUAL")
     Mono<Long> getSequence();
+
+    Mono<AdKeyword> findAdKeywordByKeywordIdAndAdId(Long keywordId, Long adId);
 }
