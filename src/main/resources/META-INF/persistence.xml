@@ -1,75 +1,75 @@
-***REMOVED***
-***REMOVED***
-***REMOVED***
-***REMOVED***
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
 
 <persistence-unit name="postgresql-example">
-***REMOVED***
+        <provider>org.hibernate.reactive.provider.ReactivePersistenceProvider</provider>
 
         <class>org.hibernate.reactive.example.session.Author</class>
         <class>org.hibernate.reactive.example.session.Book</class>
 
-***REMOVED***
+        <properties>
 
-***REMOVED*** PostgreSQL -->
+            <!-- PostgreSQL -->
             <property name="jakarta.persistence.jdbc.url"
                       value="jdbc:postgresql://localhost/hreact"/>
 
-***REMOVED*** Credentials -->
+            <!-- Credentials -->
             <property name="jakarta.persistence.jdbc.user"
                       value="hreact"/>
             <property name="jakarta.persistence.jdbc.password"
                       value="hreact"/>
 
-***REMOVED***
+            <!-- The Vert.x SQL Client connection pool size -->
             <property name="hibernate.connection.pool_size"
                       value="10"/>
 
-***REMOVED***
-***REMOVED***
+            <!-- Automatic schema export -->
+            <property name="jakarta.persistence.schema-generation.database.action"
                       value="drop-and-create"/>
 
-***REMOVED***
-***REMOVED***
-***REMOVED***
+            <!-- SQL statement logging -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
             <property name="hibernate.highlight_sql" value="true"/>
 
-***REMOVED***
+        </properties>
 
-***REMOVED***
+    </persistence-unit>
 
     <persistence-unit name="mysql-example">
-***REMOVED***
+        <provider>org.hibernate.reactive.provider.ReactivePersistenceProvider</provider>
 
         <class>org.hibernate.reactive.example.session.Author</class>
         <class>org.hibernate.reactive.example.session.Book</class>
 
-***REMOVED***
+        <properties>
 
-***REMOVED*** MySQL -->
+            <!-- MySQL -->
             <property name="jakarta.persistence.jdbc.url"
                       value="jdbc:mysql://localhost/hreact"/>
 
-***REMOVED*** Credentials -->
+            <!-- Credentials -->
             <property name="jakarta.persistence.jdbc.user"
                       value="hreact"/>
             <property name="jakarta.persistence.jdbc.password"
                       value="hreact"/>
 
-***REMOVED***
+            <!-- The Vert.x SQL Client connection pool size -->
             <property name="hibernate.connection.pool_size"
                       value="10"/>
 
-***REMOVED***
-***REMOVED***
+            <!-- Automatic schema export -->
+            <property name="jakarta.persistence.schema-generation.database.action"
                       value="drop-and-create"/>
 
-***REMOVED***
-***REMOVED***
-***REMOVED***property name="hibernate.show_sql" value="true"/-->
+            <!-- SQL statement logging -->
+            <property name="hibernate.format_sql" value="true"/>
+            <!--property name="hibernate.show_sql" value="true"/-->
 
-***REMOVED***
+        </properties>
 
-***REMOVED***
+    </persistence-unit>
 
-***REMOVED***
+</persistence>
