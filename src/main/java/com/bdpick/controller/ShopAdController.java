@@ -2,18 +2,21 @@ package com.bdpick.controller;
 
 import com.bdpick.common.BdUtil;
 import com.bdpick.common.security.JwtService;
+import com.bdpick.domain.AdImage;
 import com.bdpick.domain.BdFile;
 import com.bdpick.domain.FileType;
-import com.bdpick.domain.ShopImage;
 import com.bdpick.domain.advertisement.AdKeyword;
 import com.bdpick.domain.advertisement.ShopAd;
 import com.bdpick.domain.keyword.Keyword;
 import com.bdpick.domain.request.CommonResponse;
+import com.bdpick.dto.ShopAdDto;
 import com.bdpick.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -34,36 +37,59 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 public class ShopAdController {
     private final ShopAdRepository shopAdRepository;
     private final ShopAdDtoRepository shopAdDtoRepository;
-    private final ShopImageRepository shopImageRepository;
+    private final AdImageRepository adImageRepository;
     private final KeywordRepository keywordRepository;
     private final AdKeywordRepository adKeywordRepository;
     private final FileRepository fileRepository;
     private final JwtService jwtService;
     private final R2dbcEntityTemplate template;
+    private final DatabaseClient client;
+
+    Flux<ShopAdDto> selectShopAdDto(Pageable pageable) {
+        if (pageable == null) {
+            pageable = Pageable.ofSize(500);
+        }
+
+        return client.sql("""
+                        SELECT DISTINCT SA.*, AI.ID AS IMAGE_ID, "FILE".ID AS FILE_ID, "FILE".URI AS FILE_URI
+                        FROM SHOP_AD SA
+                                 JOIN AD_IMAGE AI on SA.ID = AI.AD_ID
+                                 JOIN "FILE" ON AI.FILE_ID = "FILE".ID
+                                 LEFT JOIN AD_KEYWORD AK on SA.ID = AK.AD_ID
+                                JOIN KEYWORD K on AK.KEYWORD_ID = K.ID
+                        ORDER BY SA.ID DESC
+                        OFFSET :offset ROWS FETCH FIRST :size ROWS ONLY
+                                """)
+                .bind("offset", pageable.getOffset())
+                .bind("size", pageable.getPageSize())
+                .fetch()
+                .all()
+//                .repeat(30)
+                .flatMap(stringObjectMap -> {
+                    ShopAdDto dto = BdUtil.objectConvert(stringObjectMap, ShopAdDto.class);
+                    return client.sql("""
+                                    SELECT K.KEYWORD FROM AD_KEYWORD AK
+                                              JOIN KEYWORD K on AK.KEYWORD_ID = K.ID
+                                    WHERE AD_ID = :adId
+                                    """)
+                            .bind("adId", stringObjectMap.get("id"))
+                            .fetch().all()
+                            .map(objectMap -> String.format("#%s", objectMap.get("KEYWORD")))
+                            .collectList()
+                            .map(list -> {
+                                dto.setKeywordList(list);
+                                dto.setKeywords(String.join(" ", list));
+                                return dto;
+                            });
+                });
+    }
 
     @GetMapping
     public Mono<CommonResponse> selectShopAds() {
-
-
-        return template.getDatabaseClient().sql("""
-                        SELECT SA.*, SI.ID AS IMAGE_ID, "FILE".ID AS FILE_ID, "FILE".URI
-                        FROM SHOP_AD SA
-                                 JOIN SHOP_IMAGE SI on SA.SHOP_ID = SI.SHOP_ID AND SI.TYPE LIKE 'A%'
-                                 JOIN "FILE" ON SI.FILE_ID = "FILE".ID
-                                 LEFT JOIN AD_KEYWORD AK on SA.ID = AK.AD_ID
-                                JOIN KEYWORD K on AK.KEYWORD_ID = K.ID""")
-                .fetch().all()
-                .map(stringObjectMap -> {
-                    System.out.println("stringObjectMap = " + stringObjectMap);
-                    return stringObjectMap;
-                })
-                .then(Mono.just(new CommonResponse()));
-
-//        return shopAdDtoRepository.findShopAdDtosByShopIdIsNotNullOrderByCreatedAtDesc()
-//                .map(shopAdDto -> {
-//                    return shopAdDto;
-//                }).then(Mono.just(new CommonResponse()));
-
+        CommonResponse response = new CommonResponse();
+        return selectShopAdDto(null)
+                .collectList()
+                .map(response::setData);
     }
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -75,43 +101,7 @@ public class ShopAdController {
         CommonResponse response = new CommonResponse();
         AtomicLong createdAdId = new AtomicLong();
 
-        return Flux.zip(filePartFlux, typeFlux)
-                .flatMap(objects -> BdUtil.uploadFile(objects.getT1(), objects.getT2(), "images")).
-                zipWith(fileRepository.getSequence().repeat())
-                .map(objects -> {
-                    BdFile file = objects.getT1();
-                    long fileSeq = objects.getT2();
-                    file.setNew(true);
-                    file.setId(fileSeq);
-                    return file;
-                })
-                // 파일 insert
-                .flatMap(fileRepository::save)
-                .transformDeferredContextual((bdFileFlux, contextView) -> {
-                    Mono<Long> shopId = Mono.just(contextView.get("shopId"));
-                    return bdFileFlux.zipWith(Mono.just(shopId).repeat());
-                })
-                .flatMap(objects -> Mono.just(objects.getT1()).zipWith(objects.getT2()))
-                .map(objects -> {
-                    BdFile file = objects.getT1();
-                    long shopId = objects.getT2();
-                    ShopImage shopImage = new ShopImage();
-                    shopImage.setNew(true);
-                    shopImage.setShopId(shopId);
-                    shopImage.setFileId(file.getId());
-                    shopImage.setType(FileType.valueOf(file.getFileType()));
-                    shopImage.setDisplayOrder(1);
-                    shopImage.setCreatedAt(LocalDateTime.now());
-                    return shopImage;
-                })
-                .zipWith(shopImageRepository.getSequence().repeat())
-                .flatMap(objects -> {
-                    ShopImage shopImage = objects.getT1();
-                    long shopImageId = objects.getT2();
-                    shopImage.setId(shopImageId);
-                    return shopImageRepository.save(shopImage);
-                }).then(shopAdRepository.getSequence())
-
+        return shopAdRepository.getSequence()
                 .transformDeferredContextual((sequenceMono, contextView) -> sequenceMono
                         .map(adId -> {
                             shopAd.setNew(true);
@@ -145,18 +135,58 @@ public class ShopAdController {
                     } else {
                         return Mono.just(keyword);
                     }
-                }).zipWith(adKeywordRepository.getSequence())
-                .flatMap(keyword -> {
-                    AdKeyword adKeyword = new AdKeyword();
-                    adKeyword.setId(keyword.getT2());
-                    adKeyword.setNew(true);
-                    adKeyword.setKeywordId(keyword.getT1().getId());
-                    adKeyword.setAdId(createdAdId.get());
-                    adKeyword.setCreatedAt(LocalDateTime.now());
-                    return adKeywordRepository.save(adKeyword);
                 })
+                .mapNotNull(Keyword::getId)
+                .distinct()
+                .flatMap((keywordId) -> {
+                    // 해당 키워드가 존재할 경우
+                    return adKeywordRepository.findAdKeywordByKeywordIdAndAdId(keywordId, createdAdId.get())
+                            // 해당 키워드가 존재하지 않을 경우
+                            .switchIfEmpty(adKeywordRepository.getSequence()
+                                    .map(adKeywordId -> {
+                                        AdKeyword adKeyword = new AdKeyword();
+                                        adKeyword.setId(adKeywordId);
+                                        adKeyword.setNew(true);
+                                        adKeyword.setKeywordId(keywordId);
+                                        adKeyword.setAdId(createdAdId.get());
+                                        adKeyword.setCreatedAt(LocalDateTime.now());
+                                        return adKeyword;
+                                    })
+                                    .flatMap(adKeywordRepository::save));
+                })
+                .thenMany(Flux.zip(filePartFlux, typeFlux))
+                .flatMap(objects -> BdUtil.uploadFile(objects.getT1(), objects.getT2(), "images")).
+                zipWith(fileRepository.getSequence().repeat())
+                .map(objects -> {
+                    BdFile file = objects.getT1();
+                    long fileSeq = objects.getT2();
+                    file.setNew(true);
+                    file.setId(fileSeq);
+                    return file;
+                })
+                // 파일 insert
+                .flatMap(fileRepository::save)
+                .map(file -> {
+                    AdImage adImage = new AdImage();
+                    adImage.setNew(true);
+//                    adImage.setShopId(shopId);
+                    adImage.setFileId(file.getId());
+                    adImage.setType(FileType.valueOf(file.getFileType()));
+                    adImage.setDisplayOrder(1);
+                    adImage.setCreatedAt(LocalDateTime.now());
+                    return adImage;
+                })
+                .zipWith(adImageRepository.getSequence().repeat())
+                .flatMap(objects -> {
+                    AdImage adImage = objects.getT1();
+                    long shopImageId = objects.getT2();
+                    adImage.setId(shopImageId);
+                    adImage.setAdId(createdAdId.get());
+                    return adImageRepository.save(adImage);
+                })
+
                 .contextWrite(context -> context.put("shopId", jwtService.getShopIdByHeaderMap(headerMap)))
-                .then(Mono.just(response));
+                .then(Mono.just(response.setData(true)));
 
     }
 }
