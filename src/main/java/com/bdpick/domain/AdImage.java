@@ -10,12 +10,12 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-@Table("SHOP_IMAGE")
-public class ShopImage implements Serializable, Persistable<Long> {
+@Table("AD_IMAGE")
+public class AdImage implements Serializable, Persistable<Long> {
     @Id
     private Long id;
     private FileType type;
-    private Long shopId;
+    private Long adId;
     private Long fileId;
     private double displayOrder;
     private LocalDateTime createdAt;

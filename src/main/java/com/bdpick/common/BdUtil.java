@@ -1,6 +1,10 @@
 package com.bdpick.common;
 
 import com.bdpick.domain.BdFile;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.ByteArrayResource;
@@ -19,6 +23,15 @@ import java.util.Optional;
 
 @Log4j2
 public class BdUtil {
+    static ObjectMapper objectMapper = new ObjectMapper();
+
+    static {
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.UPPER_SNAKE_CASE);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
+
     public static String getTokenByHeader(Map<String, Object> headerMap) {
         Optional<Map<String, Object>> optionalMap = Optional.ofNullable(headerMap);
         return optionalMap.stream()
@@ -78,4 +91,10 @@ public class BdUtil {
                     return dataBuffer.asByteBuffer().array();
                 });
     }
+
+    public static <T> T objectConvert(Object object, Class<T> toValueType) {
+        return objectMapper.convertValue(object, toValueType);
+    }
+
 }
+
