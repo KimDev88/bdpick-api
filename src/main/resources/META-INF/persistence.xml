@@ -3,73 +3,40 @@
              xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
              version="3.0">
 
-<persistence-unit name="postgresql-example">
+    <persistence-unit name="mariadb">
         <provider>org.hibernate.reactive.provider.ReactivePersistenceProvider</provider>
-
-        <class>org.hibernate.reactive.example.session.Author</class>
-        <class>org.hibernate.reactive.example.session.Book</class>
-
-        <properties>
-
-            <!-- PostgreSQL -->
-            <property name="jakarta.persistence.jdbc.url"
-                      value="jdbc:postgresql://localhost/hreact"/>
-
-            <!-- Credentials -->
-            <property name="jakarta.persistence.jdbc.user"
-                      value="hreact"/>
-            <property name="jakarta.persistence.jdbc.password"
-                      value="hreact"/>
-
-            <!-- The Vert.x SQL Client connection pool size -->
-            <property name="hibernate.connection.pool_size"
-                      value="10"/>
-
-            <!-- Automatic schema export -->
-            <property name="jakarta.persistence.schema-generation.database.action"
-                      value="drop-and-create"/>
-
-            <!-- SQL statement logging -->
-            <property name="hibernate.show_sql" value="true"/>
-            <property name="hibernate.format_sql" value="true"/>
-            <property name="hibernate.highlight_sql" value="true"/>
-
-        </properties>
-
-    </persistence-unit>
-
-    <persistence-unit name="mysql-example">
-        <provider>org.hibernate.reactive.provider.ReactivePersistenceProvider</provider>
-
-        <class>org.hibernate.reactive.example.session.Author</class>
-        <class>org.hibernate.reactive.example.session.Book</class>
-
+                <class>com.bdpick.domain.entity.advertisement.ShopAd</class>
         <properties>
 
             <!-- MySQL -->
             <property name="jakarta.persistence.jdbc.url"
-                      value="jdbc:mysql://localhost/hreact"/>
+                      value="jdbc:mariadb://138.2.115.228:3306/bdpick"/>
 
-            <!-- Credentials -->
+            <!--             Credentials -->
             <property name="jakarta.persistence.jdbc.user"
-                      value="hreact"/>
+                      value="BDPICK"/>
             <property name="jakarta.persistence.jdbc.password"
-                      value="hreact"/>
+                      value="Guseodud2407!"/>
 
-            <!-- The Vert.x SQL Client connection pool size -->
-            <property name="hibernate.connection.pool_size"
-                      value="10"/>
-
-            <!-- Automatic schema export -->
-            <property name="jakarta.persistence.schema-generation.database.action"
-                      value="drop-and-create"/>
+            <!-- Naming strategy -->
+            <property name="hibernate.physical_naming_strategy"
+                      value="org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy"/>
+            <!--            <property name="hibernate.implicit_naming_strategy" value="org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl"/>-->
 
             <!-- SQL statement logging -->
             <property name="hibernate.format_sql" value="true"/>
-            <!--property name="hibernate.show_sql" value="true"/-->
+            <property name="hibernate.show_sql" value="true"/>
 
+            <!-- Automatic schema export -->
+            <property name="jakarta.persistence.schema-generation.database.action"
+                      value="create"/>
+
+            <!-- The Vert.x SQL Client connection pool size -->
+            <!--
+                        <property name="hibernate.connection.pool_size"
+                                  value="10"/>
+            -->
         </properties>
-
     </persistence-unit>
 
 </persistence>
