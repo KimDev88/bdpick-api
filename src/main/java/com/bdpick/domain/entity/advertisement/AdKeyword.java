@@ -1,31 +1,22 @@
-//package com.bdpick.domain;
+//package com.bdpick.domain.entity.advertisement;
 //
 //import lombok.Data;
 //import org.springframework.data.annotation.Id;
 //import org.springframework.data.annotation.Transient;
 //import org.springframework.data.domain.Persistable;
-//import org.springframework.data.relational.core.mapping.Column;
 //import org.springframework.data.relational.core.mapping.Table;
 //
 //import java.io.Serializable;
 //import java.time.LocalDateTime;
 //
 //@Data
-//@Table("\"FILE\"")
-//public class BdFile implements Serializable, Persistable<Long> {
-//
+//@Table("AD_KEYWORD")
+//public class AdKeyword implements Serializable, Persistable<Long> {
 //    @Id
 //    private Long id;
-//    private String oriName;
-//    private String destName;
-//    private String extension;
-//    private String uri;
-//    @Column("\"SIZE\"")
-//    private int size;
+//    private Long adId;
+//    private Long keywordId;
 //    private LocalDateTime createdAt;
-//    private LocalDateTime updatedAt;
-//    @Transient
-//    private String fileType;
 //    @Transient
 //    private boolean isNew = false;
 //
@@ -33,4 +24,5 @@
 //    public boolean isNew() {
 //        return isNew;
 //    }
+//
 //}
