@@ -1,21 +1,32 @@
-//package com.bdpick.repository;
-//
-//import com.bdpick.domain.BdFile;
-//import org.springframework.data.domain.Example;
-//import org.springframework.data.r2dbc.repository.Query;
-//import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-//import org.springframework.stereotype.Repository;
-//import reactor.core.publisher.Mono;
-//
-//@Repository
-//public interface FileRepository extends ReactiveCrudRepository<BdFile, Long> {
-//
-////    @Query("INSERT INTO \"FILE\" (ID, ORI_NAME, DEST_NAME, EXTENSION, URI, \"SIZE\", CREATED_AT, UPDATED_AT)" +
-////            " VALUES (SEQ_FILE.NEXTVAL, :#{#files.oriName}, :#{#files.destName}, :#{#files.extension}, :#{#files.uri}, :#{#files.size}, :#{#files.createdAt}, :#{#files.updatedAt})")
-////    @Override
-////    <S extends BdFile> Mono<S> save(S files);
-//
-//    @Query("SELECT SEQ_FILE.nextval FROM DUAL")
-//    Mono<Long> getSequence();
-//
-//}
+package com.bdpick.repository;
+
+import com.bdpick.domain.entity.BdFile;
+import lombok.RequiredArgsConstructor;
+import org.hibernate.reactive.stage.Stage;
+import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+
+import static io.smallrye.mutiny.converters.uni.BuiltinConverters.toCompletableFuture;
+
+/**
+ * BdFile Repository
+ */
+@Repository
+@RequiredArgsConstructor
+public class FileRepository {
+    private final Stage.SessionFactory factory;
+
+    /**
+     * save bdFile
+     *
+     * @param bdFile entity
+     * @return saved entity
+     */
+    public CompletionStage<BdFile> save(BdFile bdFile, Stage.Session session) {
+        session.persist(bdFile);
+        return CompletableFuture.completedStage(bdFile);
+    }
+}
