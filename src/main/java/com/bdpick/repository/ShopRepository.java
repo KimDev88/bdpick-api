@@ -1,26 +1,41 @@
-//package com.bdpick.repository;
-//
-//import com.bdpick.domain.BdFile;
-//import com.bdpick.domain.Shop;
-//import org.reactivestreams.Publisher;
-//import org.springframework.data.r2dbc.repository.Query;
-//import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-//import org.springframework.stereotype.Repository;
-//import reactor.core.publisher.Flux;
-//import reactor.core.publisher.Mono;
-//
-//@Repository
-//public interface ShopRepository extends ReactiveCrudRepository<Shop, Long> {
-//
-////    @Query("INSERT INTO SHOP (ID, USER_ID, REGIST_NUMBER, NAME, OWNER_NAME, TYPE, TEL, ADDRESS_ID, ADDRESS_NAME, CREATED_AT, UPDATED_AT)" +
-////            " VALUES (SEQ_SHOP.NEXTVAL, :#{#shop.userId}, :#{#shop.registNumber}, :#{#shop.name}, :#{#shop.ownerName}" +
-////            ", :#{#shop.type}, :#{#shop.tel}, :#{#shop.addressId}, :#{#shop.addressName}, :#{#shop.createdAt}, :#{#shop.updatedAt})")
-////    @Override
-////    <S extends Shop> Mono<S> save(S shop);
-//
-//        @Query("SELECT SEQ_SHOP.nextval FROM DUAL")
-//    Mono<Long> getSequence();
-//    Mono<Shop> findShopByRegistNumber(String registNumber);
-//    Mono<Shop> findShopByUserId(String userId);
-//
-//}
+package com.bdpick.repository;
+
+import com.bdpick.domain.entity.Shop;
+import org.hibernate.reactive.stage.Stage;
+import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
+
+/**
+ * Shop Repository
+ */
+@Repository
+public class ShopRepository {
+    private final Stage.SessionFactory factory;
+
+    ShopRepository(Stage.SessionFactory factory) {
+        this.factory = factory;
+    }
+
+    /**
+     * create shop
+     *
+     * @param shop entity
+     * @return saved entity
+     */
+    public Mono<Shop> save(Shop shop) {
+        factory.withTransaction((session, transaction) ->
+                session.persist(shop)).toCompletableFuture().join();
+        return Mono.just(shop);
+    }
+
+    public Mono<Shop> findShop(Shop shop){
+        factory.withSession(session -> {
+            return session.find(Shop.class, shop.getId())
+                    .thenAccept(findedShop -> {
+                        System.out.println("shop = " + findedShop);
+                    });
+        }).toCompletableFuture().join();
+        return Mono.just(shop);
+    }
+
+}

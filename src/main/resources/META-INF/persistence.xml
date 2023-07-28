@@ -5,7 +5,12 @@
 
     <persistence-unit name="mariadb">
         <provider>org.hibernate.reactive.provider.ReactivePersistenceProvider</provider>
+                <class>com.bdpick.domain.entity.Shop</class>
+                <class>com.bdpick.domain.entity.Keyword</class>
+                <class>com.bdpick.domain.entity.BdFile</class>
+                <class>com.bdpick.domain.entity.AdImage</class>
                 <class>com.bdpick.domain.entity.advertisement.ShopAd</class>
+                <class>com.bdpick.domain.entity.advertisement.AdKeyword</class>
         <properties>
 
             <!-- MySQL -->

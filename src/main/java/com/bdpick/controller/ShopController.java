@@ -2,7 +2,7 @@
 //
 //import com.bdpick.common.BdUtil;
 //import com.bdpick.common.security.JwtService;
-//import com.bdpick.domain.BdFile;
+//import com.bdpick.domain.entity.BdFile;
 //import com.bdpick.domain.FileType;
 //import com.bdpick.domain.Shop;
 //import com.bdpick.domain.ShopImage;
