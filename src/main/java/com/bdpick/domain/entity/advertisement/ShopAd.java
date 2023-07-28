@@ -1,32 +1,46 @@
 package com.bdpick.domain.entity.advertisement;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.bdpick.domain.entity.Shop;
+import com.bdpick.domain.entity.common.AuditDate;
+import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.Comment;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Data
+/**
+ * 매장 광고 엔티티
+ */
 @Entity
-public class ShopAd implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private Long shopId;
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class ShopAd extends AuditDate implements Serializable {
+    @ManyToOne
+    @JoinColumn(nullable = false, foreignKey = @ForeignKey(name = "FK_SHOP_AD_SHOP_ID"))
+    @Comment("가게 아이디")
+    private Shop shop;
+
+    @Column(nullable = false)
+    @Comment("지점명")
     private String branchName;
+
+    @Column(nullable = false)
+    @Comment("시작일")
     private LocalDateTime startedAt;
+
+    @Column(nullable = false)
+    @Comment("종료일")
     private LocalDateTime endedAt;
+
+    @Column(nullable = false, length = 2000)
+    @Comment("홍보 내용")
     private String content;
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
-//    @Transient
-//    private List<String> keywordList;
+
+    @OneToMany(mappedBy = "shopAd", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @Comment("키워드 목록")
+    private List<AdKeyword> keywordList;
 
 }

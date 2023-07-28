@@ -3,10 +3,10 @@
 //import com.bdpick.common.BdUtil;
 //import com.bdpick.common.security.JwtService;
 //import com.bdpick.domain.AdImage;
-//import com.bdpick.domain.BdFile;
+//import com.bdpick.domain.entity.BdFile;
 //import com.bdpick.domain.FileType;
 //import com.bdpick.domain.entity.advertisement.AdKeyword;
-//import com.bdpick.domain.entity.advertisement.ShopAd;
+//import com.bdpick.domain.entity.advertisement.Keyword;
 //import com.bdpick.domain.keyword.Keyword;
 //import com.bdpick.domain.request.CommonResponse;
 //import com.bdpick.dto.ShopAdDto;
@@ -97,7 +97,7 @@
 //    public Mono<CommonResponse> createShopAd(@RequestHeader Map<String, Object> headerMap,
 //                                             @RequestPart("files") Flux<FilePart> filePartFlux,
 //                                             @RequestPart("fileTypes") Flux<String> typeFlux,
-//                                             @RequestPart("shop") ShopAd shopAd) {
+//                                             @RequestPart("shop") Keyword shopAd) {
 //        CommonResponse response = new CommonResponse();
 //        AtomicLong createdAdId = new AtomicLong();
 //

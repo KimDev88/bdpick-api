@@ -1,16 +1,28 @@
-//package com.bdpick.repository;
-//
-//import com.bdpick.domain.advertisement.AdKeyword;
-//import org.springframework.data.r2dbc.repository.Query;
-//import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-//import org.springframework.stereotype.Repository;
-//import reactor.core.publisher.Mono;
-//
-//@Repository
-//public interface AdKeywordRepository extends ReactiveCrudRepository<AdKeyword, Long> {
-//
-//    @Query("SELECT SEQ_AD_KEYWORD.nextval FROM DUAL")
-//    Mono<Long> getSequence();
-//
-//    Mono<AdKeyword> findAdKeywordByKeywordIdAndAdId(Long keywordId, Long adId);
-//}
+package com.bdpick.repository;
+
+import com.bdpick.domain.entity.Keyword;
+import com.bdpick.domain.entity.advertisement.AdKeyword;
+import lombok.RequiredArgsConstructor;
+import org.hibernate.reactive.stage.Stage;
+import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
+
+@Repository
+@RequiredArgsConstructor
+public class AdKeywordRepository {
+    private final Stage.SessionFactory factory;
+
+    /**
+     * create keyword
+     *
+     * @param adKeyword entity
+     * @return saved entity
+     */
+    public Mono<AdKeyword> save(AdKeyword adKeyword) {
+        factory.withTransaction((session, transaction) ->
+                session.persist(adKeyword)
+        ).toCompletableFuture().join();
+        return Mono.just(adKeyword);
+    }
+
+}

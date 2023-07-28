@@ -52,18 +52,13 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
     // jpa, hibernate
-    implementation 'org.hibernate.orm:hibernate-core:6.2.4.Final'
-    implementation 'org.hibernate.reactive:hibernate-reactive-core:2.0.3.Final'
+//    implementation 'org.hibernate.orm:hibernate-core:6.2.4.Final'
+    implementation 'org.hibernate.reactive:hibernate-reactive-core:2.0.4.Final'
 //    implementation 'io.vertx:vertx-oracle-client:4.4.4'
     implementation 'io.vertx:vertx-mysql-client:4.4.4'
 
     testImplementation 'junit:junit:4.13.2'
 
-
-
-    // test
-//    implementation 'org.hibernate.reactive:hibernate-reactive-core:2.0.1.Final'
-//    implementation 'io.vertx:vertx-oracle-client:4.2.7'
 
 
 }
