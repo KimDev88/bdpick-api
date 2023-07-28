@@ -1,117 +1,87 @@
 package com.bdpick.service;
 
 
+import com.bdpick.common.BdUtil;
+import com.bdpick.domain.FileType;
+import com.bdpick.domain.entity.AdImage;
+import com.bdpick.domain.entity.BdFile;
 import com.bdpick.domain.entity.advertisement.ShopAd;
 import com.bdpick.domain.request.CommonResponse;
-import com.bdpick.repository.ShopAdRepository;
+import com.bdpick.repository.*;
+import io.vertx.sqlclient.Tuple;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.reactive.stage.Stage;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.concurrent.CompletionStage;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
 public class ShopAdService {
-
+    private final Stage.SessionFactory factory;
     private final ShopAdRepository shopAdRepository;
+    private final ShopRepository shopRepository;
+    private final KeywordRepository keywordRepository;
+    private final FileRepository fileRepository;
+    private final AdImageRepository adImageRepository;
 
 
-    public Mono<CommonResponse> createShopAd(ShopAd shopAd) {
+    /**
+     * 매장 홍보 생성
+     *
+     * @param shopAd 홍보 정보
+     * @return 생성된 홍보 id
+     */
+    @Transactional
+    public Mono<CommonResponse> createShopAd(Map<String, Object> headerMap, Flux<FilePart> filePartFlux, Flux<String> typeFlux, ShopAd shopAd) {
         CommonResponse commonResponse = new CommonResponse();
-//        Long shopId = jwtService.getShopIdByHeaderMap(headerMap);
-        Long shopId = 1L;
-        shopAd.setShopId(shopId);
-        return shopAdRepository.save(shopAd)
-                .then(Mono.just(commonResponse.setData(shopAd.getId())));
-
-
-//        return shopAdRepository.getSequence()
-//                .transformDeferredContextual((sequenceMono, contextView) -> sequenceMono
-//                        .map(adId -> {
-//                            shopAd.setNew(true);
-//                            shopAd.setId(adId);
-//                            shopAd.setShopId(contextView.get("shopId"));
-//                            shopAd.setCreatedAt(LocalDateTime.now());
-//                            shopAd.setUpdatedAt(LocalDateTime.now());
-//                            return shopAd;
-//                        }))
-//                .flatMap(shopAdRepository::save)
-//                .flatMapMany(shopAd1 -> {
-//                    createdAdId.set(shopAd1.getId());
-//                    List<String> keywordList = shopAd1.getKeywordList();
-//                    return Flux.fromArray(keywordList.toArray());
-//                }).flatMap(keyword -> {
-//                    String keywordStr = (String) keyword;
-//                    Keyword keywordObj = new Keyword();
-//                    keywordObj.setNew(true);
-//                    keywordObj.setKeyword(keywordStr);
-//                    keywordObj.setCreatedAt(LocalDateTime.now());
-//                    return keywordRepository.findKeywordByKeyword(keywordStr).switchIfEmpty(Mono.just(keywordObj));
-//                })
-//                .flatMap(keyword -> {
-//                    // 키워드가 없을 경우 생성
-//                    if (keyword.getId() == null) {
-//                        return Mono.defer(keywordRepository::getSequence)
-//                                .flatMap(id -> {
-//                                    keyword.setId(id);
-//                                    return keywordRepository.save(keyword);
-//                                });
-//                    } else {
-//                        return Mono.just(keyword);
-//                    }
-//                })
-//                .mapNotNull(Keyword::getId)
-//                .distinct()
-//                .flatMap((keywordId) -> {
-//                    // 해당 키워드가 존재할 경우
-//                    return adKeywordRepository.findAdKeywordByKeywordIdAndAdId(keywordId, createdAdId.get())
-//                            // 해당 키워드가 존재하지 않을 경우
-//                            .switchIfEmpty(adKeywordRepository.getSequence()
-//                                    .map(adKeywordId -> {
-//                                        AdKeyword adKeyword = new AdKeyword();
-//                                        adKeyword.setId(adKeywordId);
-//                                        adKeyword.setNew(true);
-//                                        adKeyword.setKeywordId(keywordId);
-//                                        adKeyword.setAdId(createdAdId.get());
-//                                        adKeyword.setCreatedAt(LocalDateTime.now());
-//                                        return adKeyword;
-//                                    })
-//                                    .flatMap(adKeywordRepository::save));
-//                })
-//                .thenMany(Flux.zip(filePartFlux, typeFlux))
-//                .flatMap(objects -> BdUtil.uploadFile(objects.getT1(), objects.getT2(), "images")).
-//                zipWith(fileRepository.getSequence().repeat())
-//                .map(objects -> {
-//                    BdFile file = objects.getT1();
-//                    long fileSeq = objects.getT2();
-//                    file.setNew(true);
-//                    file.setId(fileSeq);
-//                    return file;
-//                })
-//                // 파일 insert
-//                .flatMap(fileRepository::save)
-//                .map(file -> {
-//                    AdImage adImage = new AdImage();
-//                    adImage.setNew(true);
-////                    adImage.setShopId(shopId);
-//                    adImage.setFileId(file.getId());
-//                    adImage.setType(FileType.valueOf(file.getFileType()));
-//                    adImage.setDisplayOrder(1);
-//                    adImage.setCreatedAt(LocalDateTime.now());
-//                    return adImage;
-//                })
-//                .zipWith(adImageRepository.getSequence().repeat())
-//                .flatMap(objects -> {
-//                    AdImage adImage = objects.getT1();
-//                    long shopImageId = objects.getT2();
-//                    adImage.setId(shopImageId);
-//                    adImage.setAdId(createdAdId.get());
-//                    return adImageRepository.save(adImage);
-//                })
-//
-//                .contextWrite(context -> context.put("shopId", jwtService.getShopIdByHeaderMap(headerMap)))
-//                .then(Mono.just(response.setData(true)));
+        return factory.withTransaction((session, transaction) ->
+                        // FIXME headerMap을 이용하여 shopId 조회하여 해당 shop 정보 shopAd의 add 필요
+                /*
+                  광고 저장
+                  1. shop_ad table insert
+                  2. keyword table insert
+                  3. ad_keyword table insert
+                 */
+                        shopAdRepository.save(shopAd, session)
+                                .thenRun(() -> {
+                                    // 광고 이미지 저장
+                                    List<FilePart> filePartList = filePartFlux.toStream().toList();
+                                    List<String> typeFluxList = typeFlux.toStream().toList();
+                                    IntStream
+                                            .range(0, Math.min(filePartList.size(), typeFluxList.size()))
+                                            .mapToObj(i -> Tuple.of(filePartList.get(i), typeFluxList.get(i)))
+                                            .forEach(tuple -> {
+                                                /*
+                                                  전달받은 filePart, fileType으로 파일 업로드 후 db 저장
+                                                  <br/>
+                                                  1. file upload
+                                                  2. file table insert
+                                                  3. ad_image table insert
+                                                 */
+                                                FilePart bdFile = tuple.get(FilePart.class, 0);
+                                                String type = tuple.get(String.class, 1);
+                                                BdFile createdFile = BdUtil.uploadFile(bdFile, type, "images").block();
+                                                AdImage adImage = new AdImage();
+                                                adImage.setBdFile(createdFile);
+                                                adImage.setShopAd(shopAd);
+                                                adImage.setType(FileType.A1);
+                                                adImage.setDisplayOrder(1D);
+                                                adImageRepository.save(adImage, session);
+                                            });
+                                })
+                                .handle((unused, throwable) -> {
+                                    if (throwable != null) {
+                                        transaction.markForRollback();
+                                    }
+                                    return Mono.just(commonResponse);
+                                }))
+                .toCompletableFuture().join();
     }
 }

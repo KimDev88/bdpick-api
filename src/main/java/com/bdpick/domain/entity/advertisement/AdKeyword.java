@@ -1,28 +1,37 @@
-//package com.bdpick.domain.entity.advertisement;
-//
-//import lombok.Data;
-//import org.springframework.data.annotation.Id;
-//import org.springframework.data.annotation.Transient;
-//import org.springframework.data.domain.Persistable;
-//import org.springframework.data.relational.core.mapping.Table;
-//
-//import java.io.Serializable;
-//import java.time.LocalDateTime;
-//
-//@Data
-//@Table("AD_KEYWORD")
-//public class AdKeyword implements Serializable, Persistable<Long> {
-//    @Id
-//    private Long id;
-//    private Long adId;
-//    private Long keywordId;
-//    private LocalDateTime createdAt;
-//    @Transient
-//    private boolean isNew = false;
-//
-//    @Override
-//    public boolean isNew() {
-//        return isNew;
-//    }
-//
-//}
+package com.bdpick.domain.entity.advertisement;
+
+import com.bdpick.domain.entity.Keyword;
+import com.bdpick.domain.entity.common.CreatedDate;
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import java.io.Serializable;
+
+/**
+ * 광고 키워드 엔티티
+ */
+@Entity
+@Data
+@EqualsAndHashCode(callSuper = true)
+@Table(uniqueConstraints = @UniqueConstraint(name = "UNIQUE_AD_KEYWORD", columnNames = {"ad_id", "keyword_id"}))
+public class AdKeyword extends CreatedDate implements Serializable {
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(nullable = false, name = "ad_id", foreignKey = @ForeignKey(name = "FK_AD_KEYWORD_SHOP_AD_ID"))
+    @Comment("홍보 아이디")
+    @ToString.Exclude
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private ShopAd shopAd;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(nullable = false, foreignKey = @ForeignKey(name = "FK_AD_KEYWORD_KEYWORD_ID"))
+    @Comment("키워드 아이디")
+    @ToString.Exclude
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Keyword keyword;
+
+}

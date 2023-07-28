@@ -1,6 +1,6 @@
 //package com.bdpick.common;
 //
-//import com.bdpick.domain.BdFile;
+//import com.bdpick.domain.entity.BdFile;
 //import com.bdpick.repository.FileRepository;
 //import com.oracle.bmc.ClientConfiguration;
 //import com.oracle.bmc.ConfigFileReader;
