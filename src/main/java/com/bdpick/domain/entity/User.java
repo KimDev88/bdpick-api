@@ -1,41 +1,48 @@
-//package com.bdpick.domain.entity;
-//
-//import com.bdpick.domain.UserType;
-//import lombok.Data;
-//import org.springframework.data.annotation.CreatedDate;
-//import org.springframework.data.annotation.Id;
-//import org.springframework.data.annotation.LastModifiedDate;
-//import org.springframework.data.annotation.Transient;
-//import org.springframework.data.domain.Persistable;
-//import org.springframework.data.relational.core.mapping.Table;
-//import org.springframework.security.core.GrantedAuthority;
-//import org.springframework.security.core.userdetails.UserDetails;
-//
-//import java.io.Serializable;
-//import java.time.LocalDateTime;
-//import java.util.Collection;
-//
-//@Data
-//@Table(name = "user")
-//public class User implements Serializable, UserDetails, Persistable<String> {
-//    @Id
-//    private String id;
-//    private String password;
-//    private String email;
-//    private UserType type;
-//    @CreatedDate
-//    private LocalDateTime createdAt;
-//    @LastModifiedDate
-//    private LocalDateTime updatedAt;
-//    @Transient
-//    String uuid;
-//    @Transient
-//    private boolean isNew = false;
-//
-//    @Override
-//    public boolean isNew() {
-//        return isNew;
-//    }
+package com.bdpick.domain.entity;
+
+import com.bdpick.domain.UserType;
+import jakarta.persistence.*;
+import lombok.Data;
+import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(uniqueConstraints = @UniqueConstraint(name = "UNQ_EMAIL", columnNames = {"email"}))
+//public class User extends AuditDate implements Serializable, UserDetails {
+public class User implements Serializable {
+    @Id
+    @Column(length = 100)
+    @Comment("회원 아이디")
+    private String id;
+
+    @Column(nullable = false)
+    @Comment("회원 패스워드 암호화")
+    private String password;
+
+    @Column(nullable = false)
+    @Comment("회원 이메일")
+    private String email;
+
+    @Enumerated(EnumType.STRING)
+    @Comment("N:일반유저 O : 사업주")
+    private UserType type;
+
+    @CreationTimestamp
+    @Comment("등록일")
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    @UpdateTimestamp
+    @Comment("수정일")
+    private LocalDateTime updatedAt;
+
+    @Transient
+    String uuid;
 //
 //    @Override
 //    public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -66,4 +73,4 @@
 //    public boolean isEnabled() {
 //        return false;
 //    }
-//}
+}
