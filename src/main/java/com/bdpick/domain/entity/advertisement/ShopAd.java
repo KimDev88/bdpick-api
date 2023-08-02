@@ -2,6 +2,7 @@ package com.bdpick.domain.entity.advertisement;
 
 import com.bdpick.domain.entity.Shop;
 import com.bdpick.domain.entity.common.AuditDate;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -41,6 +42,7 @@ public class ShopAd extends AuditDate implements Serializable {
 
     @OneToMany(mappedBy = "shopAd", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @Comment("키워드 목록")
+    @JsonManagedReference
     private List<AdKeyword> keywordList;
 
 }

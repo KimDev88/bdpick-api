@@ -2,10 +2,12 @@ package com.bdpick.domain.entity.advertisement;
 
 import com.bdpick.domain.entity.Keyword;
 import com.bdpick.domain.entity.common.CreatedDate;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.apache.commons.lang3.builder.EqualsExclude;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -24,7 +26,9 @@ public class AdKeyword extends CreatedDate implements Serializable {
     @JoinColumn(nullable = false, name = "ad_id", foreignKey = @ForeignKey(name = "FK_AD_KEYWORD_SHOP_AD_ID"))
     @Comment("홍보 아이디")
     @ToString.Exclude
+    @EqualsExclude
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonBackReference
     private ShopAd shopAd;
 
     @ManyToOne(cascade = CascadeType.ALL)

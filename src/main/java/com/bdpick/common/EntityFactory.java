@@ -1,5 +1,6 @@
 package com.bdpick.common;
 
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import org.hibernate.reactive.mutiny.Mutiny;
 import org.hibernate.reactive.stage.Stage;
@@ -19,6 +20,11 @@ public class EntityFactory {
     @Bean
     Mutiny.SessionFactory getMutinySessionManager() {
         return Persistence.createEntityManagerFactory("mariadb").unwrap(Mutiny.SessionFactory.class);
+    }
+
+    @Bean
+    EntityManagerFactory getSessionFactory(){
+        return Persistence.createEntityManagerFactory("mariadb");
     }
 
 
