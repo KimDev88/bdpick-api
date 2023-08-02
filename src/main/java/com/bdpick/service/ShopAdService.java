@@ -6,8 +6,8 @@ import com.bdpick.domain.FileType;
 import com.bdpick.domain.entity.AdImage;
 import com.bdpick.domain.entity.BdFile;
 import com.bdpick.domain.entity.advertisement.ShopAd;
-import com.bdpick.domain.request.CommonResponse;
-import com.bdpick.repository.*;
+import com.bdpick.repository.AdImageRepository;
+import com.bdpick.repository.ShopAdRepository;
 import io.vertx.sqlclient.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +26,6 @@ import java.util.stream.IntStream;
 public class ShopAdService {
     private final Stage.SessionFactory factory;
     private final ShopAdRepository shopAdRepository;
-    private final ShopRepository shopRepository;
-    private final KeywordRepository keywordRepository;
-    private final FileRepository fileRepository;
     private final AdImageRepository adImageRepository;
 
 
@@ -39,8 +36,7 @@ public class ShopAdService {
      * @return 생성된 홍보 id
      */
     @Transactional
-    public Mono<CommonResponse> createShopAd(Map<String, Object> headerMap, Flux<FilePart> filePartFlux, Flux<String> typeFlux, ShopAd shopAd) {
-        CommonResponse commonResponse = new CommonResponse();
+    public Mono<ShopAd> createShopAd(Map<String, Object> headerMap, Flux<FilePart> filePartFlux, Flux<String> typeFlux, ShopAd shopAd) {
         return factory.withTransaction((session, transaction) ->
                         // FIXME headerMap을 이용하여 shopId 조회하여 해당 shop 정보 shopAd의 add 필요
                 /*
@@ -80,8 +76,20 @@ public class ShopAdService {
                                     if (throwable != null) {
                                         transaction.markForRollback();
                                     }
-                                    return Mono.just(commonResponse);
+                                    return Mono.just(shopAd);
                                 }))
                 .toCompletableFuture().join();
+    }
+
+    /**
+     * find last created shopAd
+     *
+     * @return last created entity
+     */
+    public Mono<ShopAd> findLastShopAd() {
+        return factory.withSession(shopAdRepository::findLastShopAd)
+                .thenApply(Mono::just)
+                .toCompletableFuture().join();
+
     }
 }

@@ -1,29 +1,42 @@
-package com.bdpick.controller;
-
-import com.bdpick.domain.entity.User;
-import com.bdpick.domain.request.CommonResponse;
-import com.bdpick.service.SignService;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
-
-import static com.bdpick.common.BdConstants.PREFIX_API_URL;
-
-/**
- * sign controller class
- */
-@Slf4j
-@RequiredArgsConstructor
-@RestController
-@RequestMapping(PREFIX_API_URL + "/sign")
-public class SignController {
-    private final SignService signService;
+//package com.bdpick.controller;
+//
+//import com.bdpick.common.MailService;
+//import com.bdpick.common.security.JwtService;
+//import com.bdpick.domain.Device;
+//import com.bdpick.domain.Token;
+//import com.bdpick.domain.entity.User;
+//import com.bdpick.domain.Verify;
+//import com.bdpick.domain.request.CommonResponse;
+//import com.bdpick.domain.request.ResponseCode;
+//import com.bdpick.repository.DeviceRepository;
+//import com.bdpick.repository.UserRepository;
+//import com.bdpick.repository.VerifyRepository;
+//import io.jsonwebtoken.ExpiredJwtException;
+//import lombok.RequiredArgsConstructor;
+//import lombok.extern.slf4j.Slf4j;
+//import org.apache.commons.lang3.RandomStringUtils;
+//import org.springframework.transaction.annotation.Transactional;
+//import org.springframework.web.bind.annotation.*;
+//import reactor.core.publisher.Mono;
+//
+//import java.time.LocalDateTime;
+//import java.util.*;
+//import java.util.concurrent.atomic.AtomicReference;
+//
+//import static com.bdpick.common.BdConstants.PREFIX_API_URL;
+//
+//@Slf4j
+//@RequiredArgsConstructor
+//@RestController
+//@RequestMapping(PREFIX_API_URL + "/sign")
+//public class SignController {
 //    private final UserRepository userRepository;
+//    private final VerifyRepository verifyRepository;
+//    private final DeviceRepository deviceRepository;
+//    private final JwtService jwtService;
 //    private final MailService mailService;
-
-
+//
+//
 //    static private final String ERROR_NO_USER = "NO_USER";
 //    static private final String ERROR_NOT_CORRECT = "NOT_CORRECT";
 //    static private final String ERROR_EMAIL_EXIST = "EMAIL_EXIST";
@@ -32,13 +45,17 @@ public class SignController {
 //        return userRepository.findByEmail(email)
 //                .hasElement();
 //    }
-
-
-    @PostMapping("up")
-    @Transactional
-    public Mono<CommonResponse> up(@RequestBody User user) {
-        return Mono.just(new CommonResponse().setData(signService.up(user)));
-
+//
+//
+//    @PostMapping("up")
+//    @Transactional
+//    public Mono<CommonResponse> up(@RequestBody User user) {
+//        CommonResponse response = new CommonResponse();
+//        LocalDateTime now = LocalDateTime.now();
+//        user.setCreatedAt(now);
+//        user.setUpdatedAt(now);
+//        user.setNew(true);
+//
 //        return findEmailExist(user.getEmail())
 //                .flatMap(aBoolean -> {
 //                    if (aBoolean) {
@@ -49,7 +66,7 @@ public class SignController {
 //                    }
 //                    return Mono.just(response);
 //                });
-    }
+//    }
 //
 //    @PostMapping("in")
 //    @Transactional
@@ -127,17 +144,20 @@ public class SignController {
 //
 //    }
 //
-
-    /**
-     * check user is existed
-     *
-     * @param id user id
-     * @return true or false
-     */
-    @GetMapping("check/{id}")
-    public Mono<CommonResponse> isAvailableId(@PathVariable("id") String id) {
-        return Mono.just(new CommonResponse().setData(signService.isAvailableId(id)));
-    }
+//    /**
+//     * check user is existed
+//     *
+//     * @param id user id
+//     * @return true or false
+//     */
+//    @GetMapping("check/{id}")
+//    public Mono<CommonResponse> isAvailableId(@PathVariable("id") String id) {
+//        return userRepository
+//                .findById(id)
+//                .hasElement()
+//                .map(aBoolean -> !aBoolean)
+//                .map(CommonResponse::new);
+//    }
 //
 //    @Transactional
 //    @PostMapping("/send-mail")
@@ -224,5 +244,5 @@ public class SignController {
 //        }
 //        return Mono.just(response);
 //    }
-
-}
+//
+//}

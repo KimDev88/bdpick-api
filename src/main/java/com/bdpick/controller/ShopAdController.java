@@ -1,6 +1,5 @@
 package com.bdpick.controller;
 
-import com.bdpick.domain.entity.Keyword;
 import com.bdpick.domain.entity.advertisement.ShopAd;
 import com.bdpick.domain.request.CommonResponse;
 import com.bdpick.service.ShopAdService;
@@ -11,9 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 
@@ -24,16 +21,6 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 @RequiredArgsConstructor
 public class ShopAdController {
     private final ShopAdService shopAdService;
-    //    private final ShopAdRepository.java shopAdRepository;
-//    private final ShopAdDtoRepository shopAdDtoRepository;
-//    private final AdImageRepository adImageRepository;
-//    private final KeywordRepository keywordRepository;
-//    private final AdKeywordRepository adKeywordRepository;
-//    private final FileRepository fileRepository;
-//    private final JwtService jwtService;
-//    private final R2dbcEntityTemplate template;
-//    private final DatabaseClient client;
-//    private final ShopAdService shopAdService;
 //
 //    Flux<ShopAdDto> selectShopAdDto(Pageable pageable) {
 //        if (pageable == null) {
@@ -91,12 +78,13 @@ public class ShopAdController {
      * @param shopAd       shop ad dto
      * @return true, error
      */
-    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE})
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<CommonResponse> createShopAd(@RequestHeader Map<String, Object> headerMap,
-                                             @RequestPart("files") Flux<FilePart> filePartFlux,
-                                             @RequestPart("fileTypes") Flux<String> typeFlux,
-                                             @RequestPart("shop") ShopAd shopAd) {
-        return shopAdService.createShopAd(headerMap, filePartFlux, typeFlux, shopAd);
+                                             @RequestPart(value = "files") Flux<FilePart> filePartFlux,
+                                             @RequestPart(value = "fileTypes") Flux<String> typeFlux,
+                                             @RequestPart(value = "shop") ShopAd shopAd) {
+        return shopAdService.createShopAd(headerMap, filePartFlux, typeFlux, shopAd)
+                .map(createdShopAd -> new CommonResponse().setData(createdShopAd));
 
     }
 }
