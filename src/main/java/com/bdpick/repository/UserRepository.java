@@ -1,22 +1,16 @@
-//package com.bdpick.repository;
-//
-//import com.bdpick.domain.entity.User;
-//import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-//import reactor.core.publisher.Flux;
-//import reactor.core.publisher.Mono;
-//
-//public interface UserRepository extends ReactiveCrudRepository<User, String> {
-//
-//
-//    @Override
-//    Flux<User> findAll();
-//
-////    Mono<User> findById(String userId);
-//
-//    Mono<User> findByIdAndPassword(String userId, String password);
-//
-//    @Override
-//    <S extends User> Mono<S> save(S entity);
-//
-//    Mono<User> findByEmail(String email);
-//}
+package com.bdpick.repository;
+
+import com.bdpick.domain.entity.User;
+import lombok.RequiredArgsConstructor;
+import org.hibernate.reactive.stage.Stage;
+import org.springframework.stereotype.Repository;
+
+import java.util.concurrent.CompletionStage;
+
+@Repository
+@RequiredArgsConstructor
+public class UserRepository {
+    public CompletionStage<User> findById(String id, Stage.Session session) {
+        return session.find(User.class, id);
+    }
+}

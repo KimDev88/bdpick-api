@@ -1,29 +1,19 @@
-package com.bdpick.fluxstudy;
+package com.bdpick.service;
 
 import com.bdpick.domain.entity.Keyword;
 import com.bdpick.domain.entity.Shop;
 import com.bdpick.domain.entity.advertisement.AdKeyword;
 import com.bdpick.domain.entity.advertisement.ShopAd;
-import com.bdpick.domain.request.CommonResponse;
-import com.bdpick.repository.KeywordRepository;
-import com.bdpick.repository.ShopAdRepository;
-import com.bdpick.repository.ShopRepository;
-import com.bdpick.service.ShopAdService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.http.codec.multipart.Part;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -31,32 +21,31 @@ import reactor.test.StepVerifier;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-@RunWith(SpringRunner.class)
-//@WebFluxTest(ShopAdController.class)
+/**
+ * shop ad service test class
+ */
 @SpringBootTest
-public class ShopAdTests {
+public class ShopAdServiceTest {
     @Autowired
     private ShopAdService shopAdService;
-    @Autowired
-    private ShopRepository shopRepository;
-    @Autowired
-    private ShopAdRepository shopAdRepository;
-    @Autowired
-    private KeywordRepository keywordRepository;
 
     Shop shop = new Shop();
     ShopAd shopAd = new ShopAd();
+    List<FilePart> filePartList = new ArrayList<>();
 
     Flux<FilePart> partFlux;
     Flux<String> fileTypeFlux;
+    FilePart filePart;
 
     @BeforeEach
     public void setData() {
@@ -82,15 +71,13 @@ public class ShopAdTests {
             AdKeyword adKeyword = new AdKeyword();
             Keyword keyword = new Keyword();
             keyword.setKeyword(atomicInteger.getAndIncrement() + "");
-//            keyword = keywordRepository.findOrSave(keyword).block();
-//            keyword.setKeyword(LocalDateTime.now().getNano() + "");
             adKeyword.setKeyword(keyword);
             adKeyword.setShopAd(shopAd);
             return adKeyword;
         }).limit(5).collect(Collectors.toList());
         shopAd.setKeywordList(keywordList);
 
-        FilePart filePart = new FilePart() {
+        filePart = new FilePart() {
             @Override
             public String filename() {
                 return "example.jpg";
@@ -120,25 +107,29 @@ public class ShopAdTests {
 
         partFlux = Flux.just(filePart, filePart, filePart, filePart, filePart, filePart, filePart, filePart, filePart, filePart);
         fileTypeFlux = Flux.just("A1", "A2", "A1", "A2", "A1", "A2", "A1", "A2", "A1", "A2");
+        IntStream.range(0, 10)
+                .forEach(value -> {
+                    filePartList.add(filePart);
+                });
     }
 
+    /**
+     * create shop ad test
+     */
     @Test
     public void createShopAdTest() {
-        // 결과값 검증
-        CommonResponse commonResponse = new CommonResponse();
         // 생성된 아이디는 +1 된 값이어야함
         AtomicReference<Long> createdId = new AtomicReference<>(0L);
         // 현재 등록된 마지막 shopAd 조회
-        shopAdRepository.findLastShopAd()
+        shopAdService.findLastShopAd()
                 .doOnNext(shopAd1 -> {
                     createdId.set(shopAd1.getId() + 1);
                 }).subscribe();
 
         Map<String, Object> headerMap = new HashMap<>();
-
-
+        // 생성된 광고가 마지막 shopAd + 1의 아이디로 생성되었는지 검증
         StepVerifier.create(shopAdService.createShopAd(headerMap, partFlux, fileTypeFlux, shopAd))
-                .expectNext(commonResponse.setData(createdId))
+                .expectNextMatches(shopAd1 -> shopAd1.getId().equals(createdId.get()))
                 .verifyComplete();
     }
 }

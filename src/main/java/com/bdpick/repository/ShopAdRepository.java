@@ -23,7 +23,6 @@ import java.util.concurrent.CompletionStage;
 @Repository
 @RequiredArgsConstructor
 public class ShopAdRepository {
-    private final Stage.SessionFactory factory;
 
     /**
      * create shop ad
@@ -46,6 +45,7 @@ public class ShopAdRepository {
                 .setParameter("keywordList", keywordStrList)
                 .getResultList()
                 .thenApply(keywords -> {
+                    System.out.println("keywords = " + keywords);
                     // 중복제거를 위한 keyword map
                     Map<String, Keyword> resKeywordMap = new HashMap<>();
                     // keyword 병합을 위한 리스트
@@ -76,15 +76,12 @@ public class ShopAdRepository {
     /**
      * find last created shopAd
      *
+     * @param session entity session
      * @return last created entity
      */
-    public Mono<ShopAd> findLastShopAd() {
-        return Mono.just(factory.withSession(session ->
-                session.createQuery("select sa from ShopAd sa order by id desc limit 1", ShopAd.class)
-                        .getSingleResult()
-                        .thenApply(shopAd -> {
-                            System.out.println("shopAd = " + shopAd);
-                            return shopAd;
-                        })).toCompletableFuture().join());
+    public CompletionStage<ShopAd> findLastShopAd(Stage.Session session) {
+        return session.createQuery("select sa from ShopAd sa order by id desc limit 1", ShopAd.class)
+                .getSingleResultOrNull();
+
     }
 }

@@ -30,8 +30,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'io.projectreactor:reactor-test'
+
 
 //    implementation 'com.oracle.database.r2dbc:oracle-r2dbc:1.1.1'
 //    implementation 'com.oracle.database.r2dbc:oracle-r2dbc:0.4.0'
@@ -56,8 +55,11 @@ dependencies {
     implementation 'org.hibernate.reactive:hibernate-reactive-core:2.0.4.Final'
 //    implementation 'io.vertx:vertx-oracle-client:4.4.4'
     implementation 'io.vertx:vertx-mysql-client:4.4.4'
+    implementation 'cz.encircled:joiner-reactive:0.4.7'
 
-    testImplementation 'junit:junit:4.13.2'
+    // test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
 
 
 
