@@ -1,12 +1,18 @@
 package com.bdpick.controller;
 
+import com.bdpick.common.BdConstants;
 import com.bdpick.domain.entity.User;
+import com.bdpick.domain.entity.Verify;
 import com.bdpick.domain.request.CommonResponse;
+import com.bdpick.domain.request.ResponseCode;
 import com.bdpick.service.SignService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import static com.bdpick.common.BdConstants.PREFIX_API_URL;
@@ -20,13 +26,16 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 @RequestMapping(PREFIX_API_URL + "/sign")
 public class SignController {
     private final SignService signService;
-//    private final UserRepository userRepository;
+    private static final String MSG_NOT_EXIST_EMAIL = "해당 이메일이 존재하지않습니다.";
+
+    //    private final UserRepository userRepository;
 //    private final MailService mailService;
+//    @GetMapping
+//    public Mono<CommonResponse> test() {
+//
+//    }
 
 
-//    static private final String ERROR_NO_USER = "NO_USER";
-//    static private final String ERROR_NOT_CORRECT = "NOT_CORRECT";
-//    static private final String ERROR_EMAIL_EXIST = "EMAIL_EXIST";
 //
 //    private Mono<Boolean> findEmailExist(String email) {
 //        return userRepository.findByEmail(email)
@@ -34,23 +43,32 @@ public class SignController {
 //    }
 
 
+    /**
+     * sing up user
+     *
+     * @param user user entity
+     * @return true : success, false : fail
+     */
     @PostMapping("up")
     @Transactional
     public Mono<CommonResponse> up(@RequestBody User user) {
-        return Mono.just(new CommonResponse().setData(signService.up(user)));
+        CommonResponse commonResponse = new CommonResponse();
 
-//        return findEmailExist(user.getEmail())
-//                .flatMap(aBoolean -> {
-//                    if (aBoolean) {
-//                        response.setError("이미 사용중인 이메일입니다.", false);
-//                    } else {
-//                        userRepository.save(user).hasElement().subscribe();
-//                        response.setData(true);
-//                    }
-//                    return Mono.just(response);
-//                });
+        return signService.up(user)
+                .map(createdUser -> commonResponse.setData(true))
+                .onErrorResume(throwable -> {
+                    // 이미 등록된 계정일 경우
+                    if (throwable.getMessage().startsWith(BdConstants.Exception.NAME_EXCEPTION_DUPLICATE_DATA)) {
+                        return Mono.just(commonResponse
+                                .setData(false)
+                                .setCode(ResponseCode.CODE_DATA_DUPLICATE)
+                                .setMessage(ResponseCode.MESSAGE_DATA_DUPLICATE));
+                    }
+                    return Mono.just(commonResponse.setError().setData(false).setMessage(throwable.getMessage()));
+                });
     }
-//
+
+    //
 //    @PostMapping("in")
 //    @Transactional
 //    public Mono<CommonResponse> in(@RequestBody User user) {
@@ -127,66 +145,61 @@ public class SignController {
 //
 //    }
 //
+//
+//    /**
+//     * check user is existed
+//     *
+//     * @param id user id
+//     * @return true or false
+//     */
+//    @GetMapping("check/{id}")
+//    public Mono<CommonResponse> isAvailableId(@PathVariable("id") String id) {
+//        return Mono.just(new CommonResponse().setData(signService.isAvailableId(id)));
+//    }
+//
 
     /**
-     * check user is existed
+     * send email to user
      *
-     * @param id user id
-     * @return true or false
+     * @param user user with email
+     * @return response
+     * data - true : success, false : fail
      */
-    @GetMapping("check/{id}")
-    public Mono<CommonResponse> isAvailableId(@PathVariable("id") String id) {
-        return Mono.just(new CommonResponse().setData(signService.isAvailableId(id)));
+    @Transactional
+    @PostMapping("/send-mail")
+    public Mono<CommonResponse> sendMail(@RequestBody User user) {
+        CommonResponse response = new CommonResponse();
+        return signService.sendMail(user)
+                .map(aBoolean -> response.setData(true))
+                .onErrorResume(throwable -> {
+                            log.error("error : ", throwable);
+                            if (throwable instanceof RuntimeException
+                                    && throwable.getCause() != null
+                                    && throwable.getCause().getMessage().equals(BdConstants.Exception.KEY_NO_USER)) {
+                                return Mono.just(response.setError(MSG_NOT_EXIST_EMAIL, false));
+                            }
+                            return Mono.just(response.setError().setMessage(throwable.getMessage()).setData(false));
+                        }
+                );
     }
-//
-//    @Transactional
-//    @PostMapping("/send-mail")
-//    public Mono<CommonResponse> sendMail(@RequestBody User user) {
-//        CommonResponse response = new CommonResponse();
-//        String email = Optional.of(user.getEmail()).orElseThrow(NoSuchFieldError::new);
-//        String code = RandomStringUtils.randomAlphanumeric(6, 6);
-//        return findEmailExist(email).doOnNext(aBoolean -> {
-//                    if (aBoolean) {
-//                        throw new RuntimeException(ERROR_EMAIL_EXIST);
-//                    }
-//                })
-//                .then(Mono.defer(() -> {
-//                    Verify verify = new Verify();
-//                    verify.setCode(code);
-//                    verify.setEmail(email);
-//                    verify.setCreatedAt(LocalDateTime.now());
-//
-//                    return verifyRepository
-//                            .save(verify)
-//                            .hasElement()
-//                            .map(CommonResponse::new);
-//                }))
-//                .doOnNext(s -> {
-//                    mailService.sendMail(List.of(email), "BDPICK 인증번호", code);
-//
-//                })
-//                .onErrorResume(throwable -> {
-//                            log.error("error : ", throwable);
-//                            if (throwable instanceof RuntimeException && throwable.getMessage().equals(ERROR_EMAIL_EXIST)) {
-//                                return Mono.just(response.setError("이미 사용중인 이메일입니다.", false));
-//                            }
-//                            throw new RuntimeException(throwable);
-//                        }
-//                );
-//
-//    }
-//
-//    @PostMapping("verify-mail")
-//    public Mono<CommonResponse> verifyEmail(@RequestBody Verify verify) {
-//        LocalDateTime localDateTime = LocalDateTime.now().minusMinutes(3);
-//        // 해당 이메일의 가장 최근 데이터 1건 조회
-//        return verifyRepository.findFirstByEmailOrderByCreatedAtDesc(verify.getEmail())
-//                // 해당 데이터와 코드 비교 && 현재시간보다 3분전의 시간
-//                .map(
-//                        verify1 -> verify1.getCode().equals(verify.getCode()) && verify1.getCreatedAt().isAfter(localDateTime)
-//                ).map(CommonResponse::new);
-//
-//    }
+
+    /**
+     * verify email
+     *
+     * @param verify verify
+     * @return response
+     * data - true : success, false : fail
+     */
+    @PostMapping("/verify-mail")
+    public Mono<CommonResponse> verifyEmail(@RequestBody Verify verify) {
+        CommonResponse commonResponse = new CommonResponse();
+        return signService.verifyEmail(verify)
+                .map(commonResponse::setData)
+                .onErrorResume(throwable -> {
+                    log.error("error", throwable);
+                    return Mono.just(commonResponse.setError(throwable.getMessage()));
+                });
+    }
 //
 //    @PostMapping("renew")
 //    public Mono<CommonResponse> renewToken(@RequestBody Token token) {

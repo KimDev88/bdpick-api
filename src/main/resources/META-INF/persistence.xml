@@ -9,6 +9,7 @@
         ***REMOVED***
         ***REMOVED***
         ***REMOVED***
+        ***REMOVED***
                 <class>com.bdpick.domain.entity.AdImage</class>
         ***REMOVED***
         ***REMOVED***
@@ -36,6 +37,11 @@
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***
+<!--                      value="update"/>-->
+
+<!--            <property name="jakarta.persistence.schema-generation.create-script-source"-->
+<!--                      value="true"/>-->
+
 
 ***REMOVED***
 ***REMOVED***

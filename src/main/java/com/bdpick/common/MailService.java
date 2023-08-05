@@ -20,9 +20,13 @@ public class MailService {
 
     public boolean sendMail(List<String> to, String subject, String text) {
         MailConfig mailConfig = new MailConfig();
+//        mailConfig.setHostname("mail.google.com")
         mailConfig.setHostname(mailHost)
+                .setSsl(true)
+                .setPort(465)
                 .setUsername(mailUserName)
                 .setPassword(mailPassword);
+
 
         MailMessage message = new MailMessage();
         message.setSubject(subject);
