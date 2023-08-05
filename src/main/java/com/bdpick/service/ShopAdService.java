@@ -38,22 +38,22 @@ public class ShopAdService {
     @Transactional
     public Mono<ShopAd> createShopAd(Map<String, Object> headerMap, Flux<FilePart> filePartFlux, Flux<String> typeFlux, ShopAd shopAd) {
         return factory.withTransaction((session, transaction) ->
-                        // FIXME headerMap을 이용하여 shopId 조회하여 해당 shop 정보 shopAd의 add 필요
+                                // FIXME headerMap을 이용하여 shopId 조회하여 해당 shop 정보 shopAd의 add 필요
                 /*
                   광고 저장
                   1. shop_ad table insert
                   2. keyword table insert
                   3. ad_keyword table insert
                  */
-                        shopAdRepository.save(shopAd, session)
-                                .thenRun(() -> {
-                                    // 광고 이미지 저장
-                                    List<FilePart> filePartList = filePartFlux.toStream().toList();
-                                    List<String> typeFluxList = typeFlux.toStream().toList();
-                                    IntStream
-                                            .range(0, Math.min(filePartList.size(), typeFluxList.size()))
-                                            .mapToObj(i -> Tuple.of(filePartList.get(i), typeFluxList.get(i)))
-                                            .forEach(tuple -> {
+                                shopAdRepository.save(shopAd, session)
+                                        .thenRun(() -> {
+                                            // 광고 이미지 저장
+                                            List<FilePart> filePartList = filePartFlux.toStream().toList();
+                                            List<String> typeFluxList = typeFlux.toStream().toList();
+                                            IntStream
+                                                    .range(0, Math.min(filePartList.size(), typeFluxList.size()))
+                                                    .mapToObj(i -> Tuple.of(filePartList.get(i), typeFluxList.get(i)))
+                                                    .forEach(tuple -> {
                                                 /*
                                                   전달받은 filePart, fileType으로 파일 업로드 후 db 저장
                                                   <br/>
@@ -61,23 +61,20 @@ public class ShopAdService {
                                                   2. file table insert
                                                   3. ad_image table insert
                                                  */
-                                                FilePart bdFile = tuple.get(FilePart.class, 0);
-                                                String type = tuple.get(String.class, 1);
-                                                BdFile createdFile = BdUtil.uploadFile(bdFile, type, "images").block();
-                                                AdImage adImage = new AdImage();
-                                                adImage.setBdFile(createdFile);
-                                                adImage.setShopAd(shopAd);
-                                                adImage.setType(FileType.A1);
-                                                adImage.setDisplayOrder(1D);
-                                                adImageRepository.save(adImage, session);
-                                            });
-                                })
-                                .handle((unused, throwable) -> {
-                                    if (throwable != null) {
-                                        transaction.markForRollback();
-                                    }
-                                    return Mono.just(shopAd);
-                                }))
+                                                        FilePart bdFile = tuple.get(FilePart.class, 0);
+                                                        String type = tuple.get(String.class, 1);
+                                                        BdFile createdFile = BdUtil.uploadFile(bdFile, type, "images").block();
+                                                        AdImage adImage = new AdImage();
+                                                        adImage.setBdFile(createdFile);
+                                                        adImage.setShopAd(shopAd);
+                                                        adImage.setType(FileType.A1);
+                                                        adImage.setDisplayOrder(1D);
+                                                        adImageRepository.save(adImage, session);
+                                                    });
+                                        })
+                                        .thenApply(unused -> Mono.just(shopAd))
+                )
+                .exceptionally(Mono::error)
                 .toCompletableFuture().join();
     }
 
