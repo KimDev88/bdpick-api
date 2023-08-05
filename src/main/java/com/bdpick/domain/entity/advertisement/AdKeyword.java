@@ -34,7 +34,7 @@ public class AdKeyword extends CreatedDate implements Serializable {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(nullable = false, foreignKey = @ForeignKey(name = "FK_AD_KEYWORD_KEYWORD_ID"))
     @Comment("키워드 아이디")
-    @ToString.Exclude
+//    @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Keyword keyword;
 

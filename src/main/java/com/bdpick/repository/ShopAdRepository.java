@@ -70,6 +70,10 @@ public class ShopAdRepository {
                     shopAd.setKeywordList(resAdKeywordList);
                     session.persist(shopAd);
                     return shopAd;
+                })
+                .exceptionally(throwable -> {
+                    System.out.println("throwable = " + throwable);
+                    throw new RuntimeException(throwable);
                 });
     }
 
