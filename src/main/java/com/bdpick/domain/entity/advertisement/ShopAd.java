@@ -1,5 +1,6 @@
 package com.bdpick.domain.entity.advertisement;
 
+import com.bdpick.domain.entity.AdImage;
 import com.bdpick.domain.entity.Shop;
 import com.bdpick.domain.entity.common.AuditDate;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -44,5 +45,8 @@ public class ShopAd extends AuditDate implements Serializable {
     @Comment("키워드 목록")
     @JsonManagedReference
     private List<AdKeyword> keywordList;
+
+    @OneToMany(mappedBy = "shopAd", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<AdImage> adImageList;
 
 }

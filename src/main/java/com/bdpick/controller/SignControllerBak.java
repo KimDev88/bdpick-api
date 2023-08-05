@@ -5,7 +5,7 @@
 //import com.bdpick.domain.Device;
 //import com.bdpick.domain.Token;
 //import com.bdpick.domain.entity.User;
-//import com.bdpick.domain.Verify;
+//import com.bdpick.domain.entity.Verify;
 //import com.bdpick.domain.request.CommonResponse;
 //import com.bdpick.domain.request.ResponseCode;
 //import com.bdpick.repository.DeviceRepository;

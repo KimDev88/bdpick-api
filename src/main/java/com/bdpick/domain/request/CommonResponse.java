@@ -55,4 +55,9 @@ public class CommonResponse implements Serializable {
         this.code = code;
         return this;
     }
+
+    public CommonResponse setMessage(String message) {
+        this.message = message;
+        return this;
+    }
 }

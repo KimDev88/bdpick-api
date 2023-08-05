@@ -47,45 +47,53 @@ public class BdUtil {
 
 
     public static Mono<BdFile> uploadFile(FilePart part, String fileType, String directoryName) {
-//        String uri = "http://127.0.0.1:9090/api/file-upload";
-        String uri = "http://152.69.231.150:9090/api/file-upload";
-        String fileName = part.filename();
-        String extension = FilenameUtils.getExtension(fileName);
+//    public static CompletionStage<BdFile> uploadFile(FilePart part, String fileType, String directoryName) {
+        try {
+//            String uri = "http://127.0.0.1:9090/api/file-upload";
+            String uri = "http://152.69.231.150:9090/api/file-upload";
+            String fileName = part.filename();
+            String extension = FilenameUtils.getExtension(fileName);
 
-        return getByteArray(part)
-                .flatMap(bytes -> {
-                    MultipartBodyBuilder builder = new MultipartBodyBuilder();
-                    builder.part("directory", directoryName + "/" + fileType);
-                    String header = String.format("form-data; name=%s; filename=%s", "file", fileName);
-                    builder.part("file", new ByteArrayResource(bytes))
-                            .header("Content-Disposition", header);
+            return getByteArray(part)
+                    .flatMap(bytes -> {
+                        MultipartBodyBuilder builder = new MultipartBodyBuilder();
+                        builder.part("directory", directoryName + "/" + fileType);
+                        String header = String.format("form-data; name=%s; filename=%s", "file", fileName);
+                        builder.part("file", new ByteArrayResource(bytes))
+                                .header("Content-Disposition", header);
 
-                    return WebClient.builder()
-                            .defaultHeader("Content-Type", MediaType.MULTIPART_FORM_DATA_VALUE)
-                            .build()
-                            .post()
-                            .uri(uri)
-                            .body(BodyInserters.fromMultipartData(builder.build()))
-                            .retrieve()
-                            .bodyToMono(String.class)
-                            .map(string -> {
-                                BdFileDto file = new BdFileDto();
-                                file.setOriName(fileName);
-                                file.setDestName(fileName);
-                                file.setExtension(extension);
-                                file.setUri(string);
-                                file.setSize(bytes.length);
-                                file.setCreatedAt(LocalDateTime.now());
-                                file.setUpdatedAt(LocalDateTime.now());
-                                file.setFileType(fileType);
-                                BdFile bdFile = BdFileMapper.INSTANCE.BdFileDtoToBdfile(file);
-                                return bdFile;
-                            })
-                            .onErrorResume(throwable -> {
-                                log.error("error : ", throwable);
-                                throw new RuntimeException(throwable);
-                            });
-                });
+                        return WebClient.builder()
+                                .defaultHeader("Content-Type", MediaType.MULTIPART_FORM_DATA_VALUE)
+                                .build()
+                                .post()
+                                .uri(uri)
+                                .body(BodyInserters.fromMultipartData(builder.build()))
+                                .retrieve()
+                                .bodyToMono(String.class)
+                                .map(string -> {
+                                    BdFileDto file = new BdFileDto();
+                                    file.setOriName(fileName);
+                                    file.setDestName(fileName);
+                                    file.setExtension(extension);
+                                    file.setUri(string);
+                                    file.setSize(bytes.length);
+                                    file.setCreatedAt(LocalDateTime.now());
+                                    file.setUpdatedAt(LocalDateTime.now());
+                                    file.setFileType(fileType);
+                                    BdFile bdFile = BdFileMapper.INSTANCE.BdFileDtoToBdfile(file);
+                                    return bdFile;
+                                })
+                                .onErrorResume(throwable -> {
+                                    log.error("error : ", throwable);
+//                                    return Mono.error(throwable);
+                                    throw new RuntimeException(throwable);
+                                });
+                    });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+//            return Mono.error(e);
+        }
+//
     }
 
     public static Mono<byte[]> getByteArray(FilePart filePart) {
