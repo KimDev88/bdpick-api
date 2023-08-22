@@ -6,6 +6,7 @@ import com.bdpick.domain.entity.common.CreatedDate;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.OnDelete;
@@ -25,6 +26,7 @@ public class AdImage extends CreatedDate implements Serializable {
 
     @ManyToOne(optional = false)
     @JoinColumn(foreignKey = @ForeignKey(name = "FK_AD_IMAGE_SHOP_AD_ID"))
+    @ToString.Exclude
     @Comment("홍보 아이디")
     private ShopAd shopAd;
 

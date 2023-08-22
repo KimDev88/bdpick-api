@@ -94,6 +94,22 @@ public class ShopAdControllerTest {
                     });
                 })
                 .expectStatus().isOk();
+    }
+
+    /**
+     * find shop ads test
+     */
+    @Test
+    public void findShopAds() {
+        webClient.get().uri(PREFIX_API_URL + "/shop-ads")
+                .exchange()
+                .expectAll(responseSpec -> {
+                    responseSpec.expectStatus().isOk();
+                    responseSpec.expectBody(CommonResponse.class).consumeWith(commonResponseEntityExchangeResult -> {
+                        assert Objects.requireNonNull(commonResponseEntityExchangeResult.getResponseBody()).getData() != null;
+                    });
+                })
+                .expectStatus().isOk();
 
     }
 }

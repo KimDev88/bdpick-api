@@ -6,6 +6,7 @@ import com.bdpick.domain.FileType;
 import com.bdpick.domain.entity.AdImage;
 import com.bdpick.domain.entity.BdFile;
 import com.bdpick.domain.entity.advertisement.ShopAd;
+import com.bdpick.dto.Pageable;
 import com.bdpick.repository.AdImageRepository;
 import com.bdpick.repository.ShopAdRepository;
 import io.vertx.sqlclient.Tuple;
@@ -86,7 +87,21 @@ public class ShopAdService {
     public Mono<ShopAd> findLastShopAd() {
         return factory.withSession(shopAdRepository::findLastShopAd)
                 .thenApply(Mono::just)
+                .exceptionally(Mono::error)
                 .toCompletableFuture().join();
 
+    }
+
+    /**
+     * find shop ads with pageable
+     *
+     * @param pageable pageable
+     * @return shop ad flux
+     */
+    public Flux<ShopAd> findShopAds(Pageable pageable) {
+        return factory.withSession(session -> shopAdRepository.findShopAds(pageable, session))
+                .thenApply(shopAds -> Flux.fromArray(shopAds.toArray(new ShopAd[0])))
+                .exceptionally(Flux::error)
+                .toCompletableFuture().join();
     }
 }
