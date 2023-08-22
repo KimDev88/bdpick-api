@@ -2,16 +2,15 @@ package com.bdpick.controller;
 
 import com.bdpick.domain.entity.advertisement.ShopAd;
 import com.bdpick.domain.request.CommonResponse;
+import com.bdpick.dto.Pageable;
 import com.bdpick.service.ShopAdService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.awt.print.Pageable;
 import java.util.Map;
 
 import static com.bdpick.common.BdConstants.PREFIX_API_URL;
@@ -24,10 +23,10 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 public class ShopAdController {
     private final ShopAdService shopAdService;
 
-    @GetMapping
-    public Mono<CommonResponse> selectShopAds(Pageable pageable) {
-        return Mono.just(new CommonResponse());
-    }
+//    @GetMapping
+//    public Mono<CommonResponse> selectShopAds(Pageable pageable) {
+//        return Mono.just(new CommonResponse());
+//    }
 
 
 //
@@ -88,7 +87,8 @@ public class ShopAdController {
      * @return true, error
      */
 
-    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+//    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping
     public Mono<CommonResponse> createShopAd(@RequestHeader Map<String, Object> headerMap,
                                              @RequestPart(value = "files") Flux<FilePart> filePartFlux,
                                              @RequestPart(value = "fileTypes") Flux<String> typeFlux,
@@ -98,6 +98,24 @@ public class ShopAdController {
                 .map(commonResponse::setData)
                 .onErrorResume(throwable
                         -> {
+                    log.error("error", throwable);
+                    return Mono.just(commonResponse.setError().setMessage(throwable.getMessage()));
+                });
+    }
+
+    /**
+     * find shop ads with pageable
+     *
+     * @param pageable pageable
+     * @return shop ads
+     */
+    @GetMapping
+    public Mono<CommonResponse> findShopAds(Pageable pageable) {
+        CommonResponse commonResponse = new CommonResponse();
+        return shopAdService.findShopAds(pageable)
+                .collectList()
+                .map(commonResponse::setData)
+                .onErrorResume(throwable -> {
                     log.error("error", throwable);
                     return Mono.just(commonResponse.setError().setMessage(throwable.getMessage()));
                 });

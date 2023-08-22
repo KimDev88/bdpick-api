@@ -4,6 +4,7 @@ import com.bdpick.domain.entity.Keyword;
 import com.bdpick.domain.entity.Shop;
 import com.bdpick.domain.entity.advertisement.AdKeyword;
 import com.bdpick.domain.entity.advertisement.ShopAd;
+import com.bdpick.dto.Pageable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +102,7 @@ public class ShopAdServiceTest {
             @Override
             public Flux<DataBuffer> content() {
                 return DataBufferUtils.read(
-                        new ByteArrayResource("name" .getBytes(StandardCharsets.UTF_8)), new DefaultDataBufferFactory(), 1024);
+                        new ByteArrayResource("name".getBytes(StandardCharsets.UTF_8)), new DefaultDataBufferFactory(), 1024);
             }
         };
 
@@ -131,5 +132,15 @@ public class ShopAdServiceTest {
         StepVerifier.create(shopAdService.createShopAd(headerMap, partFlux, fileTypeFlux, shopAd))
                 .expectNextMatches(shopAd1 -> shopAd1.getId().equals(createdId.get()))
                 .verifyComplete();
+    }
+
+    /**
+     * select shop ad list
+     */
+    @Test
+    public void selectShopAdList() {
+        StepVerifier.create(shopAdService.findShopAds(new Pageable(0, 100)))
+                .verifyComplete();
+
     }
 }

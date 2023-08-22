@@ -1,20 +1,19 @@
 package com.bdpick.repository;
 
 import com.bdpick.domain.entity.Keyword;
-import com.bdpick.domain.entity.Shop;
 import com.bdpick.domain.entity.advertisement.AdKeyword;
 import com.bdpick.domain.entity.advertisement.ShopAd;
+import com.bdpick.dto.Pageable;
 import jakarta.transaction.Transactional;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.reactive.stage.Stage;
 import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -85,7 +84,22 @@ public class ShopAdRepository {
      */
     public CompletionStage<ShopAd> findLastShopAd(Stage.Session session) {
         return session.createQuery("select sa from ShopAd sa order by id desc limit 1", ShopAd.class)
+//                .setFirstResult(0)
                 .getSingleResultOrNull();
 
+    }
+
+    /**
+     * find shop ad with pageable
+     *
+     * @param pageable pageable dto
+     * @param session  session
+     * @return shop ad list
+     */
+    public CompletionStage<List<ShopAd>> findShopAds(Pageable pageable, @NonNull Stage.Session session) {
+        return session.createQuery("select ad from ShopAd ad order by id asc", ShopAd.class)
+                .setFirstResult(pageable.getOffset())
+                .setMaxResults(pageable.getSize())
+                .getResultList();
     }
 }
