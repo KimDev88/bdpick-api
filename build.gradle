@@ -31,7 +31,7 @@ dependencies {
 //    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 //        implementation 'org.springframework.boot:spring-boot-starter-data'
-    implementation 'org.springframework.data:spring-data-jpa:3.1.2'
+//    implementation 'org.springframework.data:spring-data-jpa:3.1.2'
 
 
     compileOnly 'org.projectlombok:lombok'
