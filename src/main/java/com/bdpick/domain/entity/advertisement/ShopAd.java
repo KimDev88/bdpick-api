@@ -46,7 +46,7 @@ public class ShopAd extends AuditDate implements Serializable {
     @JsonManagedReference
     private List<AdKeyword> keywordList;
 
-    @OneToMany(mappedBy = "shopAd", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "shopAd", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<AdImage> adImageList;
 
 }
