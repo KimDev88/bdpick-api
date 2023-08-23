@@ -1,19 +1,21 @@
-package com.bdpick.domain.entity;//package com.bdpick.domain;
+package com.bdpick.domain.entity.shop;
 
+import com.bdpick.domain.entity.User;
 import com.bdpick.domain.entity.common.AuditDate;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import lombok.*;
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Comment;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Shop extends AuditDate implements Serializable {
-
-    private String userId;
+    @OneToOne
+    private User user;
 
     @Column(nullable = false, length = 10, columnDefinition = "CHAR(10)")
     @Comment("사업자 등록번호")
@@ -41,6 +43,9 @@ public class Shop extends AuditDate implements Serializable {
     @Column(nullable = false)
     @Comment("상세주소명")
     private String addressName;
+
+    @OneToMany(mappedBy = "shop", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<ShopImage> imageList;
 //    @Transient
 //    private String addressFullName;
 }

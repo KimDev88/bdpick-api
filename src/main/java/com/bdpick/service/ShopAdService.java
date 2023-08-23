@@ -1,11 +1,13 @@
 package com.bdpick.service;
 
 
+import com.bdpick.common.BdConstants;
 import com.bdpick.common.BdUtil;
-import com.bdpick.domain.FileType;
-import com.bdpick.domain.entity.AdImage;
+import com.bdpick.domain.AdFileType;
 import com.bdpick.domain.entity.BdFile;
+import com.bdpick.domain.entity.advertisement.AdImage;
 import com.bdpick.domain.entity.advertisement.ShopAd;
+import com.bdpick.domain.entity.common.Image;
 import com.bdpick.dto.Pageable;
 import com.bdpick.repository.AdImageRepository;
 import com.bdpick.repository.ShopAdRepository;
@@ -64,12 +66,14 @@ public class ShopAdService {
                                                  */
                                                         FilePart bdFile = tuple.get(FilePart.class, 0);
                                                         String type = tuple.get(String.class, 1);
-                                                        BdFile createdFile = BdUtil.uploadFile(bdFile, type, "images").block();
+                                                        BdFile createdFile = BdUtil.uploadFile(bdFile, type, BdConstants.DIRECTORY_NAME_IMAGES).block();
                                                         AdImage adImage = new AdImage();
-                                                        adImage.setBdFile(createdFile);
+                                                        Image image = new Image();
+                                                        image.setBdFile(createdFile);
+                                                        image.setDisplayOrder(1D);
                                                         adImage.setShopAd(shopAd);
-                                                        adImage.setType(FileType.A1);
-                                                        adImage.setDisplayOrder(1D);
+                                                        adImage.setType(AdFileType.A1);
+                                                        adImage.setImage(image);
                                                         adImageRepository.save(adImage, session);
                                                     });
                                         })

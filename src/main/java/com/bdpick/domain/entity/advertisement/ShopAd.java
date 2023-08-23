@@ -1,13 +1,14 @@
 package com.bdpick.domain.entity.advertisement;
 
-import com.bdpick.domain.entity.AdImage;
-import com.bdpick.domain.entity.Shop;
 import com.bdpick.domain.entity.common.AuditDate;
+import com.bdpick.domain.entity.shop.Shop;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class ShopAd extends AuditDate implements Serializable {
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(nullable = false, foreignKey = @ForeignKey(name = "FK_SHOP_AD_SHOP_ID"))
     @Comment("가게 아이디")
     private Shop shop;

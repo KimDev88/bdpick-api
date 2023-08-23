@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @MappedSuperclass
-public class AuditDate extends CreatedDate {
+public abstract class AuditDate extends CreatedDate {
     @Column(nullable = false)
     @UpdateTimestamp
     @Comment("수정일")
