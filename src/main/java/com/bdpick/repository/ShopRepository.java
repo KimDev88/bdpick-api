@@ -1,20 +1,20 @@
 package com.bdpick.repository;
 
-import com.bdpick.domain.entity.Shop;
+import com.bdpick.domain.entity.shop.Shop;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.reactive.stage.Stage;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
+
+import java.util.concurrent.CompletionStage;
 
 /**
  * Shop Repository
  */
 @Repository
+@RequiredArgsConstructor
 public class ShopRepository {
     private final Stage.SessionFactory factory;
-
-    ShopRepository(Stage.SessionFactory factory) {
-        this.factory = factory;
-    }
 
     /**
      * create shop
@@ -22,13 +22,12 @@ public class ShopRepository {
      * @param shop entity
      * @return saved entity
      */
-    public Mono<Shop> save(Shop shop) {
-        factory.withTransaction((session, transaction) ->
-                session.persist(shop)).toCompletableFuture().join();
-        return Mono.just(shop);
+    public CompletionStage<Shop> save(Shop shop, Stage.Session session) {
+        return session.persist(shop)
+                .thenApply(unused -> shop);
     }
 
-    public Mono<Shop> findShop(Shop shop){
+    public Mono<Shop> findShop(Shop shop) {
         factory.withSession(session -> {
             return session.find(Shop.class, shop.getId())
                     .thenAccept(findedShop -> {

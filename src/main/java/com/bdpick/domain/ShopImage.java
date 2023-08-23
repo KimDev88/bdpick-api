@@ -14,7 +14,7 @@
 //public class ShopImage implements Serializable, Persistable<Long> {
 //    @Id
 //    private Long id;
-//    private FileType type;
+//    private ShopFileType type;
 //    private Long shopId;
 //    private Long fileId;
 //    private double displayOrder;

@@ -2,7 +2,7 @@ package com.bdpick.controller;
 
 import com.bdpick.config.EntityConfiguration;
 import com.bdpick.domain.entity.Keyword;
-import com.bdpick.domain.entity.Shop;
+import com.bdpick.domain.entity.shop.Shop;
 import com.bdpick.domain.entity.advertisement.AdKeyword;
 import com.bdpick.domain.entity.advertisement.ShopAd;
 import com.bdpick.domain.request.CommonResponse;
