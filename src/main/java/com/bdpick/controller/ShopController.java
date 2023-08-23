@@ -1,69 +1,46 @@
-//package com.bdpick.controller;
-//
-//import com.bdpick.common.BdUtil;
-//import com.bdpick.common.security.JwtService;
-//import com.bdpick.domain.entity.BdFile;
-//import com.bdpick.domain.FileType;
-//import com.bdpick.domain.Shop;
-//import com.bdpick.domain.ShopImage;
-//import com.bdpick.domain.request.CommonResponse;
-//import com.bdpick.domain.request.ResponseCode;
-//import com.bdpick.repository.FileRepository;
-//import com.bdpick.repository.ShopImageRepository;
-//import com.bdpick.repository.ShopRepository;
-//import lombok.Data;
-//import lombok.extern.slf4j.Slf4j;
-//import org.apache.commons.lang3.StringUtils;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.http.MediaType;
-//import org.springframework.http.codec.multipart.FilePart;
-//import org.springframework.transaction.annotation.Transactional;
-//import org.springframework.web.bind.annotation.*;
-//import org.springframework.web.reactive.function.client.WebClient;
-//import org.springframework.web.util.DefaultUriBuilderFactory;
-//import reactor.core.publisher.Flux;
-//import reactor.core.publisher.Mono;
-//import reactor.core.scheduler.Schedulers;
-//import reactor.util.context.Context;
-//
-//import java.io.IOException;
-//import java.nio.file.Files;
-//import java.nio.file.Path;
-//import java.time.LocalDateTime;
-//import java.util.*;
-//
-//import static com.bdpick.common.BdConstants.PREFIX_API_URL;
-//
-//@Data
-//class Part {
-//    Path filePath;
-//    FilePart part;
-//}
-//
-//@RestController
-//@Slf4j
-//@RequestMapping(value = PREFIX_API_URL + "/shops", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
-//public class ShopController {
-//
-//    @Value("${openapi.token}")
-//    String openApiToken;
-//
-//    @Value("${upload-path}")
-//    String uploadPath;
-//
-//    final private ShopRepository shopRepository;
+package com.bdpick.controller;
+
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.nio.file.Path;
+
+import static com.bdpick.common.BdConstants.PREFIX_API_URL;
+
+@Data
+class Part {
+    Path filePath;
+    FilePart part;
+}
+
+/**
+ * shop controller
+ */
+@RestController
+@RequiredArgsConstructor
+@Slf4j
+@RequestMapping(value = PREFIX_API_URL + "/shops", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+public class ShopController {
+
+    @Value("${openapi.token}")
+    String openApiToken;
+
+    @Value("${upload-path}")
+    String uploadPath;
+
+    //    final private ShopRepository shopRepository;
 //    final private ShopImageRepository shopImageRepository;
 //    final private FileRepository fileRepository;
 //    final JwtService jwtService;
-//    private final String ERROR_NAME_DUPLICATE_REGISTER = "DuplicateNumber";
-//
-//    public ShopController(ShopRepository shopRepository, ShopImageRepository shopImageRepository, FileRepository fileRepository, JwtService jwtService) {
-//        this.shopRepository = shopRepository;
-//        this.shopImageRepository = shopImageRepository;
-//        this.fileRepository = fileRepository;
-//        this.jwtService = jwtService;
-//    }
-//
+    private final String ERROR_NAME_DUPLICATE_REGISTER = "DuplicateNumber";
+
+
 //    @GetMapping("this")
 //    public Mono<CommonResponse> selectMyShop(@RequestHeader Map<String, Object> map) {
 //        String token = BdUtil.getTokenByHeader(map);
@@ -166,7 +143,7 @@
 //    public Mono<CommonResponse> createShop(@RequestHeader Map<String, Object> headerMap,
 //                                           @RequestPart("files") Flux<FilePart> files,
 //                                           @RequestPart("fileTypes") Flux<String> filesTypes,
-//                                           @RequestPart("shop")Shop shop) {
+//                                           @RequestPart("shop") Shop shop) {
 //
 //        String userId = jwtService.getUserIdByHeaderMap(headerMap);
 //        // 매장 정보 저장
@@ -220,7 +197,7 @@
 //                    shopImage.setNew(true);
 //                    shopImage.setShopId(shopId);
 //                    shopImage.setFileId(file.getId());
-//                    shopImage.setType(FileType.valueOf(file.getFileType()));
+//                    shopImage.setType(ShopFileType.valueOf(file.getFileType()));
 //                    shopImage.setDisplayOrder(1);
 //                    shopImage.setCreatedAt(LocalDateTime.now());
 //                    return shopImage;
@@ -246,4 +223,4 @@
 //                })
 //                .onErrorReturn(new CommonResponse(ResponseCode.CODE_ERROR, ResponseCode.MESSAGE_ERROR, false));
 //    }
-//}
+}

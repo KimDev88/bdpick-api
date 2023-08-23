@@ -1,7 +1,6 @@
 package com.bdpick.repository;
 
-import com.bdpick.domain.entity.AdImage;
-import com.bdpick.domain.entity.BdFile;
+import com.bdpick.domain.entity.advertisement.AdImage;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.reactive.stage.Stage;
 import org.springframework.stereotype.Repository;

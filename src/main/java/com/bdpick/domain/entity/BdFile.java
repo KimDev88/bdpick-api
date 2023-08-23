@@ -12,7 +12,6 @@ import java.io.Serializable;
 
 @Data
 @Entity
-//@Table("\"FILE\"")
 @Table(name = "FILE")
 @EqualsAndHashCode(callSuper = true)
 public class BdFile extends AuditDate implements Serializable {

@@ -5,14 +5,15 @@
 
     <persistence-unit name="mariadb">
         <provider>org.hibernate.reactive.provider.ReactivePersistenceProvider</provider>
-                <class>com.bdpick.domain.entity.Shop</class>
-                <class>com.bdpick.domain.entity.Keyword</class>
-                <class>com.bdpick.domain.entity.BdFile</class>
-                <class>com.bdpick.domain.entity.User</class>
-                <class>com.bdpick.domain.entity.Verify</class>
-                <class>com.bdpick.domain.entity.AdImage</class>
-                <class>com.bdpick.domain.entity.advertisement.ShopAd</class>
-                <class>com.bdpick.domain.entity.advertisement.AdKeyword</class>
+        <class>com.bdpick.domain.entity.Keyword</class>
+        <class>com.bdpick.domain.entity.BdFile</class>
+        <class>com.bdpick.domain.entity.User</class>
+        <class>com.bdpick.domain.entity.Verify</class>
+        <class>com.bdpick.domain.entity.shop.Shop</class>
+        <class>com.bdpick.domain.entity.shop.ShopImage</class>
+        <class>com.bdpick.domain.entity.advertisement.AdImage</class>
+        <class>com.bdpick.domain.entity.advertisement.ShopAd</class>
+        <class>com.bdpick.domain.entity.advertisement.AdKeyword</class>
         <properties>
 
             <!-- MySQL -->
@@ -37,10 +38,10 @@
             <!-- Automatic schema export -->
             <property name="jakarta.persistence.schema-generation.database.action"
                       value="create"/>
-<!--                      value="update"/>-->
+            <!--                      value="update"/>-->
 
-<!--            <property name="jakarta.persistence.schema-generation.create-script-source"-->
-<!--                      value="true"/>-->
+            <!--            <property name="jakarta.persistence.schema-generation.create-script-source"-->
+            <!--                      value="true"/>-->
 
 
             <!-- The Vert.x SQL Client connection pool size -->
