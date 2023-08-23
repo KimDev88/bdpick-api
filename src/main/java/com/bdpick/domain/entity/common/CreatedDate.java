@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @MappedSuperclass
-public class CreatedDate extends PrimaryKey {
+public abstract class CreatedDate extends PrimaryKey {
     @Column(nullable = false)
     @CreationTimestamp
     @Comment("등록일")

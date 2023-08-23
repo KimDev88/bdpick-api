@@ -14,7 +14,7 @@ import org.hibernate.annotations.Comment;
 @Getter
 @Setter
 @MappedSuperclass
-public class PrimaryKey {
+public abstract class PrimaryKey {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("아이디")
