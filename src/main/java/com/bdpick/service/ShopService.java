@@ -8,6 +8,7 @@ import com.bdpick.domain.entity.common.Image;
 import com.bdpick.domain.entity.shop.Shop;
 import com.bdpick.domain.entity.shop.ShopImage;
 import com.bdpick.repository.ShopRepository;
+import io.vertx.sqlclient.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -20,24 +21,15 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.IntStream;
+
+import static com.bdpick.common.BdConstants.Exception.KEY_DUPLICATE_REGISTER;
 
 @Service
 @RequiredArgsConstructor
 public class ShopService {
     private final Stage.SessionFactory factory;
     private final ShopRepository shopRepository;
-
-//    /**
-//     * create shop
-//     *
-//     * @param shop entity
-//     * @return created entity
-//     */
-//    public Mono<CommonResponse> createShop(Shop shop) {
-//        CommonResponse commonResponse = new CommonResponse();
-//        return Mono.just(commonResponse.setData(shopRepository.save(shop)));
-//    }
 
     /**
      * create shop
@@ -54,35 +46,38 @@ public class ShopService {
                                  @NonNull Flux<String> filesTypes,
                                  @NonNull Shop shop) {
         List<ShopImage> imageList = new ArrayList<>();
-        AtomicReference<Shop> shopReference = new AtomicReference<>();
         return factory.withTransaction(session -> {
-                    return shopRepository.save(shop, session)
-                            .thenApply((createdShop) ->
-                                    {
-                                        shopReference.set(createdShop);
-                                        return files.zipWith(filesTypes)
-                                                .doOnNext(objects -> {
-                                                    String type = objects.getT2();
-                                                    ShopImage shopImage = new ShopImage();
-                                                    Image image = new Image();
-                                                    BdFile bdFile = BdUtil.uploadFile(objects.getT1(), type, BdConstants.DIRECTORY_NAME_IMAGES).block();
+                    // 사업자등록번호로 조회
+                    return shopRepository.findShopByRegistNumber(shop, session)
+                            .thenCompose(foundShop -> {
+                                // 해당 사업자 등록번호의 매장이 이미 존재할 경우
+                                if (foundShop != null) {
+                                    throw new RuntimeException(KEY_DUPLICATE_REGISTER);
+                                }
+                                // 매장 이미지 저장
+                                List<FilePart> filePartList = files.toStream().toList();
+                                List<String> fileTypeList = filesTypes.toStream().toList();
+                                IntStream.range(0, Math.min(filePartList.size(), fileTypeList.size()))
+                                        .mapToObj(i -> Tuple.of(filePartList.get(i), fileTypeList.get(i)))
+                                        .forEach(tuple -> {
+                                            String type = tuple.getString(1);
+                                            ShopImage shopImage = new ShopImage();
+                                            Image image = new Image();
+                                            BdFile bdFile = BdUtil.uploadFile(tuple.get(FilePart.class, 0), type, BdConstants.DIRECTORY_NAME_IMAGES).block();
 
-                                                    image.setDisplayOrder(1L);
-                                                    image.setBdFile(bdFile);
+                                            image.setDisplayOrder(1L);
+                                            image.setBdFile(bdFile);
 
-                                                    shopImage.setShop(createdShop);
-                                                    shopImage.setImage(image);
-                                                    shopImage.setType(ShopFileType.valueOf(type));
-                                                    imageList.add(shopImage);
-                                                });
-                                    }
-                            )
-                            .thenApply(unused -> {
-                                Shop returnShop = shopReference.get();
-                                returnShop.setImageList(imageList);
-                                return Mono.just(returnShop);
+                                            shopImage.setShop(shop);
+                                            shopImage.setImage(image);
+                                            shopImage.setType(ShopFileType.valueOf(type));
+                                            imageList.add(shopImage);
+                                        });
+                                shop.setImageList(imageList);
+                                return shopRepository.save(shop, session);
                             });
                 })
+                .thenApply(Mono::just)
                 .exceptionally(Mono::error)
                 .toCompletableFuture().join();
     }

@@ -58,26 +58,8 @@ public class ShopServiceTest {
         shop.setTel("01025562407");
         shop.setAddressName("호계1동");
         shop.setOwnerName("김용수");
-        shop.setRegistNumber("3788600265");
+        shop.setRegisterNumber("3788600265");
         shop.setUser(user);
-//        shopRepository.save(shop).subscribe();
-
-        shopAd.setShop(shop);
-        shopAd.setBranchName("지점명");
-        shopAd.setStartedAt(LocalDateTime.now());
-        shopAd.setEndedAt(LocalDateTime.now().plusDays(7L));
-        shopAd.setContent("세일합니다.");
-        AtomicInteger atomicInteger = new AtomicInteger(0);
-        // 키워드 값 설정
-        List<AdKeyword> keywordList = Stream.generate(() -> {
-            AdKeyword adKeyword = new AdKeyword();
-            Keyword keyword = new Keyword();
-            keyword.setKeyword(atomicInteger.getAndIncrement() + "");
-            adKeyword.setKeyword(keyword);
-            adKeyword.setShopAd(shopAd);
-            return adKeyword;
-        }).limit(5).collect(Collectors.toList());
-        shopAd.setKeywordList(keywordList);
 
         filePart = new FilePart() {
             @Override
@@ -122,10 +104,9 @@ public class ShopServiceTest {
     public void createShopTest() {
         Map<String, Object> headerMap = new HashMap<>();
         StepVerifier.create(shopService.createShop(headerMap, partFlux, fileTypeFlux, shop))
-//        StepVerifier.create(shopService.createShop(null, partFlux, fileTypeFlux, shop))
                 .expectNextMatches(createdShop -> (
                         createdShop.getId() != null &&
-                                createdShop.getRegistNumber().equals(registNumber))
+                                createdShop.getRegisterNumber().equals(registNumber))
                 )
                 .verifyComplete();
 

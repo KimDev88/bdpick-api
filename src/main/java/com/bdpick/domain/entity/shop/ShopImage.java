@@ -3,6 +3,7 @@ package com.bdpick.domain.entity.shop;
 import com.bdpick.domain.ShopFileType;
 import com.bdpick.domain.entity.common.CreatedDate;
 import com.bdpick.domain.entity.common.Image;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,6 +22,7 @@ public class ShopImage extends CreatedDate implements Serializable {
     @ManyToOne(optional = false)
     @JoinColumn(foreignKey = @ForeignKey(name = "FK_SHOP_IMAGE_SHOP_ID"))
     @ToString.Exclude
+    @JsonBackReference
     @Comment("가게 아이디")
     private Shop shop;
 
