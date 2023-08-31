@@ -1,16 +1,23 @@
 package com.bdpick.controller;
 
+import com.bdpick.domain.entity.shop.Shop;
+import com.bdpick.domain.request.CommonResponse;
+import com.bdpick.service.ShopService;
+import jakarta.transaction.Transactional;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.nio.file.Path;
+import java.util.Map;
 
+import static com.bdpick.common.BdConstants.Exception.KEY_DUPLICATE_REGISTER;
 import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 
 @Data
@@ -29,19 +36,18 @@ class Part {
 public class ShopController {
 
     @Value("${openapi.token}")
-    String openApiToken;
+    private String openApiToken;
 
     @Value("${upload-path}")
-    String uploadPath;
+    private String uploadPath;
+    private final ShopService shopService;
 
     //    final private ShopRepository shopRepository;
 //    final private ShopImageRepository shopImageRepository;
 //    final private FileRepository fileRepository;
 //    final JwtService jwtService;
-    private final String ERROR_NAME_DUPLICATE_REGISTER = "DuplicateNumber";
 
-
-//    @GetMapping("this")
+    //    @GetMapping("this")
 //    public Mono<CommonResponse> selectMyShop(@RequestHeader Map<String, Object> map) {
 //        String token = BdUtil.getTokenByHeader(map);
 //        String userId = jwtService.getUserIdByToken(token);
@@ -138,14 +144,30 @@ public class ShopController {
 //                });
 //    }
 //
-//    @Transactional
-//    @PostMapping
-//    public Mono<CommonResponse> createShop(@RequestHeader Map<String, Object> headerMap,
-//                                           @RequestPart("files") Flux<FilePart> files,
-//                                           @RequestPart("fileTypes") Flux<String> filesTypes,
-//                                           @RequestPart("shop") Shop shop) {
+    @Transactional
+    @PostMapping
+    public Mono<CommonResponse> createShop(@RequestHeader Map<String, Object> headerMap,
+                                           @RequestPart("files") Flux<FilePart> files,
+                                           @RequestPart("fileTypes") Flux<String> filesTypes,
+                                           @RequestPart("shop") Shop shop) {
 //
 //        String userId = jwtService.getUserIdByHeaderMap(headerMap);
+        CommonResponse response = new CommonResponse();
+
+        return shopService.createShop(headerMap, files, filesTypes, shop)
+                .map(CommonResponse::new)
+                .onErrorResume(throwable -> {
+                    log.error("throwable = ", throwable);
+
+                    if (throwable instanceof RuntimeException) {
+                        if (throwable.getCause().getMessage().equals(KEY_DUPLICATE_REGISTER)) {
+                            return Mono.just(response.setError("해당 사업자 번호는 이미 가입되어있습니다.", null));
+                        }
+                    } else return Mono.just(response.setError().setMessage(throwable.getMessage()));
+                    return Mono.just(response.setError().setMessage(throwable.getMessage()));
+                });
+
+    }
 //        // 매장 정보 저장
 //        Mono<Long> shopIdMono = shopRepository.getSequence()
 //                .flatMap(sequence -> {

@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Table(uniqueConstraints = @UniqueConstraint(name = "UNIQUE_KEYWORD", columnNames = {"keyword"}))
+@Table(uniqueConstraints = @UniqueConstraint(name = "UNQ_KEYWORD", columnNames = {"keyword"}))
 public class Keyword extends CreatedDate implements Serializable {
     @Column(length = 10)
     private String keyword;

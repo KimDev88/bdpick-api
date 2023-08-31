@@ -1,6 +1,7 @@
 package com.bdpick.domain.entity;
 
 import com.bdpick.domain.UserType;
+import com.bdpick.domain.entity.shop.Shop;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.Comment;
@@ -42,7 +43,12 @@ public class User implements Serializable {
     private LocalDateTime updatedAt;
 
     @Transient
-    String uuid;
+    private String uuid;
+
+    @OneToOne(mappedBy = "user")
+    private Shop shop;
+
+
 //
 //    @Override
 //    public Collection<? extends GrantedAuthority> getAuthorities() {
