@@ -37,4 +37,21 @@ public class ShopRepository {
         return Mono.just(shop);
     }
 
+    /**
+     * find shop by registNumber
+     *
+     * @param shop    shop
+     * @param session session
+     * @return shop
+     */
+    public CompletionStage<Shop> findShopByRegistNumber(Shop shop, Stage.Session session) {
+        return session.createQuery("SELECT s FROM Shop s WHERE registerNumber = :registerNumber", Shop.class)
+                .setParameter("registerNumber", shop.getRegisterNumber())
+                .getSingleResultOrNull()
+                .thenApply(rtnShop -> {
+                    System.out.println("shop1 = " + rtnShop);
+                    return rtnShop;
+                });
+    }
+
 }
