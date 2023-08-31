@@ -20,7 +20,7 @@ import java.io.Serializable;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Table(uniqueConstraints = @UniqueConstraint(name = "UNIQUE_AD_KEYWORD", columnNames = {"ad_id", "keyword_id"}))
+@Table(uniqueConstraints = @UniqueConstraint(name = "UNQ_AD_KEYWORD", columnNames = {"ad_id", "keyword_id"}))
 public class AdKeyword extends CreatedDate implements Serializable {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(nullable = false, name = "ad_id", foreignKey = @ForeignKey(name = "FK_AD_KEYWORD_SHOP_AD_ID"))
