@@ -16,16 +16,6 @@
 ***REMOVED***
 ***REMOVED***
 
-***REMOVED*** MySQL -->
-            <property name="jakarta.persistence.jdbc.url"
-                      value="jdbc:mariadb://138.2.115.228:3306/bdpick"/>
-
-***REMOVED***             Credentials -->
-            <property name="jakarta.persistence.jdbc.user"
-                      value="BDPICK"/>
-            <property name="jakarta.persistence.jdbc.password"
-                      value="Guseodud2407!"/>
-
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***
