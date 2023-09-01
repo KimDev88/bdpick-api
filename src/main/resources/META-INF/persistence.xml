@@ -1,0 +1,45 @@
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
+
+    <persistence-unit name="mariadb">
+        <provider>org.hibernate.reactive.provider.ReactivePersistenceProvider</provider>
+        <class>com.bdpick.domain.entity.Keyword</class>
+        <class>com.bdpick.domain.entity.BdFile</class>
+        <class>com.bdpick.domain.entity.User</class>
+        <class>com.bdpick.domain.entity.Verify</class>
+        <class>com.bdpick.domain.entity.shop.Shop</class>
+        <class>com.bdpick.domain.entity.shop.ShopImage</class>
+        <class>com.bdpick.domain.entity.advertisement.AdImage</class>
+        <class>com.bdpick.domain.entity.advertisement.ShopAd</class>
+        <class>com.bdpick.domain.entity.advertisement.AdKeyword</class>
+        <properties>
+
+            <!-- Naming strategy -->
+            <property name="hibernate.physical_naming_strategy"
+                      value="org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy"/>
+            <!--            <property name="hibernate.implicit_naming_strategy" value="org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl"/>-->
+
+            <!-- SQL statement logging -->
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.show_sql" value="true"/>
+
+            <!-- Automatic schema export -->
+            <property name="jakarta.persistence.schema-generation.database.action"
+                      value="create"/>
+            <!--                      value="update"/>-->
+
+            <!--            <property name="jakarta.persistence.schema-generation.create-script-source"-->
+            <!--                      value="true"/>-->
+
+
+            <!-- The Vert.x SQL Client connection pool size -->
+            <!--
+                        <property name="hibernate.connection.pool_size"
+                                  value="10"/>
+            -->
+        </properties>
+    </persistence-unit>
+
+</persistence>
