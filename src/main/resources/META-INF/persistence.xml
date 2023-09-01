@@ -16,16 +16,6 @@
         <class>com.bdpick.domain.entity.advertisement.AdKeyword</class>
         <properties>
 
-            <!-- MySQL -->
-            <property name="jakarta.persistence.jdbc.url"
-                      value="jdbc:mariadb://138.2.115.228:3306/bdpick"/>
-
-            <!--             Credentials -->
-            <property name="jakarta.persistence.jdbc.user"
-                      value="BDPICK"/>
-            <property name="jakarta.persistence.jdbc.password"
-                      value="Guseodud2407!"/>
-
             <!-- Naming strategy -->
             <property name="hibernate.physical_naming_strategy"
                       value="org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy"/>
