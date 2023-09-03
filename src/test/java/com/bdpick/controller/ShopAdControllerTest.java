@@ -77,7 +77,7 @@ public class ShopAdControllerTest {
      * create shop ad api test
      */
     @Test
-    public void CreateShopAdUrlApiTest() {
+    public void createShopAdUrlApiTest() {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("files", new ClassPathResource("oci_config"));
         builder.part("fileTypes", "A1");

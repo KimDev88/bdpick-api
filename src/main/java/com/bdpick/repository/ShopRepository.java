@@ -38,18 +38,18 @@ public class ShopRepository {
     }
 
     /**
-     * find shop by registNumber
+     * find shop by registerNumber
      *
      * @param shop    shop
      * @param session session
      * @return shop
      */
-    public CompletionStage<Shop> findShopByRegistNumber(Shop shop, Stage.Session session) {
+    public CompletionStage<Shop> findShopByRegisterNumber(Shop shop, Stage.Session session) {
         return session.createQuery("SELECT s FROM Shop s WHERE registerNumber = :registerNumber", Shop.class)
                 .setParameter("registerNumber", shop.getRegisterNumber())
                 .getSingleResultOrNull()
                 .thenApply(rtnShop -> {
-                    System.out.println("shop1 = " + rtnShop);
+                    System.out.println("rtnShop = " + rtnShop);
                     return rtnShop;
                 });
     }

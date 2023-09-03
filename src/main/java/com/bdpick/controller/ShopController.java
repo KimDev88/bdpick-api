@@ -32,11 +32,10 @@ class Part {
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping(value = PREFIX_API_URL + "/shops", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(value = PREFIX_API_URL + "/shops")
+//@RequestMapping(value = PREFIX_API_URL + "/shops", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
 public class ShopController {
 
-    @Value("${openapi.token}")
-    private String openApiToken;
 
     @Value("${upload-path}")
     private String uploadPath;
@@ -56,10 +55,20 @@ public class ShopController {
 //    }
 //
 //
+    /**
+     * check register number is available
+     *
+     * @param shop shop
+     * @return true : available, false : unavailable
+     */
     @PostMapping(value = "check-register")
     public Mono<CommonResponse> checkRegisterNumber(@RequestBody Shop shop) {
         CommonResponse response = new CommonResponse();
-        return Mono.just(response);
+        return shopService.checkRegisterNumber(shop)
+                .onErrorResume(throwable -> {
+                    log.error("throwable = ", throwable);
+                    return Mono.just(response.setError().setMessage(throwable.getMessage()));
+                });
     }
 
 

@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
@@ -50,7 +51,10 @@ public class ShopControllerTest {
         shop.setTel("01025562407");
         shop.setAddressName("호계1동");
         shop.setOwnerName("김용수");
-        shop.setRegisterNumber("3788600265");
+        // 신규
+//        shop.setRegisterNumber("6990901684");
+        // 폐업
+        shop.setRegisterNumber("1141679791");
         shop.setUser(user);
     }
 
@@ -58,7 +62,7 @@ public class ShopControllerTest {
      * create shop ad api test
      */
     @Test
-    public void CreateShopApiTest() {
+    public void createShopApiTest() {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("files", new ClassPathResource("oci_config"));
         builder.part("fileTypes", "S1");
@@ -67,6 +71,23 @@ public class ShopControllerTest {
         webClient.post().uri(PREFIX_API_URL + "/shops")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(builder.build()))
+                .exchange()
+                .expectAll(responseSpec -> {
+                    responseSpec.expectStatus().isOk();
+                    responseSpec.expectBody(CommonResponse.class).consumeWith(commonResponseEntityExchangeResult -> {
+                        assert Objects.requireNonNull(commonResponseEntityExchangeResult.getResponseBody()).getData() != null;
+                    });
+                })
+                .expectStatus().isOk();
+    }
+
+    /**
+     * check register number is available
+     */
+    @Test
+    public void checkRegisterApiTest() {
+        webClient.post().uri(PREFIX_API_URL + "/shops/check-register")
+                .body(Mono.just(shop), Shop.class)
                 .exchange()
                 .expectAll(responseSpec -> {
                     responseSpec.expectStatus().isOk();
