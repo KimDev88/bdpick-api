@@ -1,8 +1,8 @@
 package com.bdpick.repository;
 
 import com.bdpick.domain.entity.User;
+import lombok.NonNull;
 import org.hibernate.reactive.stage.Stage;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 
 import java.util.concurrent.CompletionStage;
@@ -19,7 +19,7 @@ public class SignRepository {
      * @param session session
      * @return 등록된 user
      */
-    public CompletionStage<User> up(User user, @NotNull Stage.Session session) {
+    public CompletionStage<User> up(User user, @NonNull Stage.Session session) {
         return session.persist(user)
                 .thenApply(unused -> user);
     }
