@@ -1,6 +1,6 @@
 package com.bdpick.repository;
 
-import com.bdpick.config.EntityConfiguration;
+import com.bdpick.config.CommonTestConfiguration;
 import com.bdpick.domain.entity.User;
 import org.hibernate.reactive.stage.Stage;
 import org.junit.jupiter.api.Assertions;
@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Import;
  */
 @SpringBootTest
 //    @DataJpaTest
-@Import(EntityConfiguration.class)
+@Import(CommonTestConfiguration.class)
 public class UserRepositoryTest {
     @Autowired
     private Stage.SessionFactory factory;

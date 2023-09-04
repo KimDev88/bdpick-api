@@ -2,8 +2,10 @@ package com.bdpick.service;
 
 import com.bdpick.common.BdConstants;
 import com.bdpick.common.BdUtil;
+import com.bdpick.common.security.JwtService;
 import com.bdpick.domain.ShopFileType;
 import com.bdpick.domain.entity.BdFile;
+import com.bdpick.domain.entity.User;
 import com.bdpick.domain.entity.common.Image;
 import com.bdpick.domain.entity.shop.Shop;
 import com.bdpick.domain.entity.shop.ShopImage;
@@ -13,6 +15,7 @@ import io.vertx.sqlclient.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.reactive.stage.Stage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.codec.multipart.FilePart;
@@ -29,13 +32,42 @@ import static com.bdpick.common.BdConstants.Exception.KEY_DUPLICATE_REGISTER;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ShopService {
+
     private final Stage.SessionFactory factory;
     private final ShopRepository shopRepository;
+    private final JwtService jwtService;
+
     private static final String MSG_EXIST_REGISTER_NUMBER = "이미 존재하는 사업자번호 입니다.";
 
     @Value("${openapi.token}")
     private String openApiToken;
+
+    /**
+     * select my shop
+     *
+     * @param headerMap request headerMap
+     * @return my shop
+     */
+    public Mono<Shop> selectMyShop(@NonNull Map<String, Object> headerMap) {
+        try {
+            String token = BdUtil.getTokenByHeader(headerMap);
+            String userId = jwtService.getUserIdByToken(token);
+            return factory.withSession(session -> {
+                        return shopRepository.findShopByUserId(userId, session);
+                    })
+                    .thenApply(shop -> {
+                        log.info(shop.toString());
+                        return Mono.just(shop);
+                    })
+                    .exceptionally(Mono::error)
+                    .toCompletableFuture().join();
+        } catch (Exception e) {
+            return Mono.error(e);
+        }
+
+    }
 
     /**
      * create shop
@@ -52,6 +84,12 @@ public class ShopService {
                                  @NonNull Flux<String> filesTypes,
                                  @NonNull Shop shop) {
         List<ShopImage> imageList = new ArrayList<>();
+        // token 에서 회원정보 추출
+        String userId = jwtService.getUserIdByHeaderMap(headerMap);
+        User user = new User();
+        user.setId(userId);
+        shop.setUser(user);
+
         return factory.withTransaction(session -> {
                     // 사업자등록번호로 조회
                     return shopRepository.findShopByRegisterNumber(shop, session)
@@ -121,7 +159,6 @@ public class ShopService {
                     if (rtnShop != null) {
                         response.setError(MSG_EXIST_REGISTER_NUMBER, false);
                         return Mono.just(response);
-//                        return response;
                     } else {
                         return client
                                 .post()
@@ -153,4 +190,23 @@ public class ShopService {
                 .exceptionally(Mono::error)
                 .toCompletableFuture().join();
     }
+
+    /**
+     * find shopId by userId
+     *
+     * @param userId userId
+     * @return shopId
+     */
+    public Long getShopIdByUserId(String userId) {
+        return factory.withSession(session -> shopRepository.findShopByUserId(userId, session)
+                        .thenApply(shop -> {
+                            Long shopId = shop.getId();
+                            log.info("shopId = " + shopId);
+                            return shopId;
+                        })
+                )
+                .toCompletableFuture().join();
+    }
+
+
 }

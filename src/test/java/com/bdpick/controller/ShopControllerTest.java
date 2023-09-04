@@ -1,6 +1,7 @@
 package com.bdpick.controller;
 
-import com.bdpick.config.EntityConfiguration;
+import com.bdpick.common.security.JwtService;
+import com.bdpick.config.CommonTestConfiguration;
 import com.bdpick.domain.entity.User;
 import com.bdpick.domain.entity.advertisement.ShopAd;
 import com.bdpick.domain.entity.shop.Shop;
@@ -20,6 +21,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
 import java.util.Objects;
 
 import static com.bdpick.common.BdConstants.PREFIX_API_URL;
@@ -28,7 +30,7 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
  * shop ad controller test class
  */
 @WebFluxTest(ShopController.class)
-@Import(EntityConfiguration.class)
+@Import(CommonTestConfiguration.class)
 public class ShopControllerTest {
     @Autowired
     private WebTestClient webClient;
@@ -37,6 +39,11 @@ public class ShopControllerTest {
     private ShopService shopService;
     @SpyBean
     private ShopRepository shopRepository;
+    @SpyBean
+    private JwtService jwtService;
+
+    @Autowired
+    Map<String, Object> headerMap;
 
     Shop shop;
     ShopAd shopAd;
@@ -55,7 +62,26 @@ public class ShopControllerTest {
 //        shop.setRegisterNumber("6990901684");
         // 폐업
         shop.setRegisterNumber("1141679791");
-        shop.setUser(user);
+    }
+
+    /**
+     * select my shop info
+     */
+    @Test
+    public void selectMyShopApiTest() {
+        webClient.get().uri(PREFIX_API_URL + "/shops/this")
+                .headers(httpHeaders -> {
+                    httpHeaders.add("authorization", "Bearer " + jwtService.createAccessToken("su2407"));
+                })
+                .exchange()
+                .expectAll(responseSpec -> {
+                    responseSpec.expectStatus().isOk();
+                    responseSpec.expectBody(CommonResponse.class).consumeWith(commonResponseEntityExchangeResult -> {
+                        assert Objects.requireNonNull(commonResponseEntityExchangeResult.getResponseBody()).getData() != null;
+                    });
+                })
+                .expectStatus().isOk();
+
     }
 
     /**
@@ -69,6 +95,9 @@ public class ShopControllerTest {
         builder.part("shop", shop);
 
         webClient.post().uri(PREFIX_API_URL + "/shops")
+                .headers(httpHeaders -> {
+                    httpHeaders.add("authorization", "Bearer " + jwtService.createAccessToken("su2407"));
+                })
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(builder.build()))
                 .exchange()

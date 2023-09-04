@@ -28,6 +28,7 @@ public class Shop extends AuditDate implements Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "FK_SHOP_USER_ID"))
     @ToString.Exclude
+    @JsonManagedReference
     private User user;
 
     @Column(nullable = false, length = 10, columnDefinition = "CHAR(10)")

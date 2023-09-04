@@ -1,8 +1,10 @@
 package com.bdpick.service;
 
+import com.bdpick.common.security.JwtService;
 import com.bdpick.domain.entity.User;
 import com.bdpick.domain.entity.advertisement.ShopAd;
 import com.bdpick.domain.entity.shop.Shop;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +21,7 @@ import reactor.test.StepVerifier;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
 
 /**
@@ -33,30 +32,44 @@ public class ShopServiceTest {
     @Autowired
     private ShopService shopService;
 
-    private final String registerNumber = "3788600266";
-    Shop shop;
-    ShopAd shopAd = new ShopAd();
-    List<FilePart> filePartList = new ArrayList<>();
+    @Autowired
+    private JwtService jwtService;
 
-    Flux<FilePart> partFlux;
-    Flux<String> fileTypeFlux;
-    FilePart filePart;
+    private  String registerNumber;
+    private Shop shop;
+    private ShopAd shopAd = new ShopAd();
+    private List<FilePart> filePartList = new ArrayList<>();
+
+    private Flux<FilePart> partFlux;
+    private Flux<String> fileTypeFlux;
+    private FilePart filePart;
+
+    private Map<String, Object> headerMap = new HashMap<>();
+
+    private String userId;
+
+
 
     @BeforeEach
     public void setData() {
+        userId = "su2407";
         shop = new Shop();
         User user = new User();
-        user.setId("su2407");
+        user.setId(userId);
 
         shop.setName("테스트 매장");
         shop.setTel("01025562407");
         shop.setAddressName("호계1동");
         shop.setOwnerName("김용수");
         // 신규
-//        shop.setRegisterNumber("6990901684");
+        registerNumber = "6990901684";
         // 폐업
-        shop.setRegisterNumber("1141679791");
+        registerNumber = "1141679791";
+        shop.setRegisterNumber(registerNumber);
         shop.setUser(user);
+
+        // headermap
+        headerMap.put("authorization", "Bearer " + jwtService.createAccessToken(userId));
 
         filePart = new FilePart() {
             @Override
@@ -95,11 +108,21 @@ public class ShopServiceTest {
     }
 
     /**
+     * select my shop info
+     */
+    @Test
+    public void selectMyShop() {
+        StepVerifier.create(shopService.selectMyShop(headerMap))
+                .expectNextMatches(Objects::nonNull)
+                .verifyComplete();
+    }
+
+    /**
      * create shop test
      */
     @Test
     public void createShopTest() {
-        Map<String, Object> headerMap = new HashMap<>();
+//        Map<String, Object> headerMap = new HashMap<>();
         StepVerifier.create(shopService.createShop(headerMap, partFlux, fileTypeFlux, shop))
                 .expectNextMatches(createdShop -> (
                         createdShop.getId() != null &&
@@ -120,4 +143,10 @@ public class ShopServiceTest {
                 )
                 .verifyComplete();
     }
+
+    @Test
+    public void getShopIdByUserId() {
+        Assertions.assertNotNull(shopService.getShopIdByUserId(userId));
+    }
+
 }

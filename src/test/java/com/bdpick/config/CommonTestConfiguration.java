@@ -1,5 +1,6 @@
 package com.bdpick.config;
 
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.reactive.mutiny.Mutiny;
@@ -12,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @TestConfiguration
-public class EntityConfiguration {
+public class CommonTestConfiguration {
     @Value("${jdbc.url}")
     private String jdbcUrl;
     @Value("${jdbc.user}")
@@ -21,19 +22,26 @@ public class EntityConfiguration {
     private String jdbcPassword;
     Map<String, String> propertiesMap = new HashMap<>();
 
+
     @Bean
     Stage.SessionFactory getEntitySessionManager() {
-        propertiesMap.put(AvailableSettings.JAKARTA_JDBC_URL, jdbcUrl);
-        propertiesMap.put(AvailableSettings.JAKARTA_JDBC_USER, jdbcUser);
-        propertiesMap.put(AvailableSettings.JAKARTA_JDBC_PASSWORD, jdbcPassword);
-        return Persistence.createEntityManagerFactory("mariadb", propertiesMap).unwrap(Stage.SessionFactory.class);
+        return getFactoryWithProperties().unwrap(Stage.SessionFactory.class);
     }
 
     @Bean
     Mutiny.SessionFactory getMutinySessionManager() {
+        return getFactoryWithProperties().unwrap(Mutiny.SessionFactory.class);
+    }
+
+    /**
+     * get hibernate factory with properties
+     *
+     * @return EntityManagerFactory
+     */
+    EntityManagerFactory getFactoryWithProperties() {
         propertiesMap.put(AvailableSettings.JAKARTA_JDBC_URL, jdbcUrl);
         propertiesMap.put(AvailableSettings.JAKARTA_JDBC_USER, jdbcUser);
         propertiesMap.put(AvailableSettings.JAKARTA_JDBC_PASSWORD, jdbcPassword);
-        return Persistence.createEntityManagerFactory("mariadb", propertiesMap).unwrap(Mutiny.SessionFactory.class);
+        return Persistence.createEntityManagerFactory("mariadb", propertiesMap);
     }
 }

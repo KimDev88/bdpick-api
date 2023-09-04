@@ -42,12 +42,12 @@ public class ShopAdService {
     public Mono<ShopAd> createShopAd(Map<String, Object> headerMap, Flux<FilePart> filePartFlux, Flux<String> typeFlux, ShopAd shopAd) {
         return factory.withTransaction((session, transaction) ->
                                 // FIXME headerMap을 이용하여 shopId 조회하여 해당 shop 정보 shopAd의 add 필요
-                /*
-                  광고 저장
-                  1. shop_ad table insert
-                  2. keyword table insert
-                  3. ad_keyword table insert
-                 */
+                                /*
+                                  광고 저장
+                                  1. shop_ad table insert
+                                  2. keyword table insert
+                                  3. ad_keyword table insert
+                                 */
                                 shopAdRepository.save(shopAd, session)
                                         .thenRun(() -> {
                                             // 광고 이미지 저장

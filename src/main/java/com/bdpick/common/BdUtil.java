@@ -35,12 +35,18 @@ public class BdUtil {
     }
 
 
+    /**
+     * header map 에서 jwt token 추출
+     *
+     * @param headerMap request header map
+     * @return jwt token
+     */
     public static String getTokenByHeader(Map<String, Object> headerMap) {
         Optional<Map<String, Object>> optionalMap = Optional.ofNullable(headerMap);
         return optionalMap.stream()
                 .map(stringObjectMap -> (String) stringObjectMap.get("authorization"))
                 .flatMap(s -> Arrays.stream(s.split("Bearer ")))
-                .filter(s -> !"" .equals(s))
+                .filter(s -> !"".equals(s))
                 .findAny()
                 .orElse(null);
     }

@@ -1,7 +1,7 @@
 package com.bdpick.controller;
 
 import com.bdpick.common.MailService;
-import com.bdpick.config.EntityConfiguration;
+import com.bdpick.config.CommonTestConfiguration;
 import com.bdpick.domain.UserType;
 import com.bdpick.domain.entity.User;
 import com.bdpick.domain.entity.Verify;
@@ -29,7 +29,7 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
  * sign controller test
  */
 @WebFluxTest(SignController.class)
-@Import(EntityConfiguration.class)
+@Import(CommonTestConfiguration.class)
 public class SignControllerTest {
     @Autowired
     private WebTestClient client;

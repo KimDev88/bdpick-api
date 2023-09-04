@@ -1,5 +1,6 @@
 package com.bdpick.common;
 
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.reactive.mutiny.Mutiny;
@@ -26,18 +27,24 @@ public class EntityFactory {
 
     @Bean
     Stage.SessionFactory getEntitySessionManager() {
-        propertiesMap.put(AvailableSettings.JAKARTA_JDBC_URL, jdbcUrl);
-        propertiesMap.put(AvailableSettings.JAKARTA_JDBC_USER, jdbcUser);
-        propertiesMap.put(AvailableSettings.JAKARTA_JDBC_PASSWORD, jdbcPassword);
-        return Persistence.createEntityManagerFactory("mariadb", propertiesMap).unwrap(Stage.SessionFactory.class);
+        return getFactoryWithProperties().unwrap(Stage.SessionFactory.class);
     }
 
     @Bean
     Mutiny.SessionFactory getMutinySessionManager() {
+        return getFactoryWithProperties().unwrap(Mutiny.SessionFactory.class);
+    }
+
+    /**
+     * get hibernate factory with properties
+     *
+     * @return EntityManagerFactory
+     */
+    EntityManagerFactory getFactoryWithProperties() {
         propertiesMap.put(AvailableSettings.JAKARTA_JDBC_URL, jdbcUrl);
         propertiesMap.put(AvailableSettings.JAKARTA_JDBC_USER, jdbcUser);
         propertiesMap.put(AvailableSettings.JAKARTA_JDBC_PASSWORD, jdbcPassword);
-        return Persistence.createEntityManagerFactory("mariadb", propertiesMap).unwrap(Mutiny.SessionFactory.class);
+        return Persistence.createEntityManagerFactory("mariadb", propertiesMap);
     }
 
 

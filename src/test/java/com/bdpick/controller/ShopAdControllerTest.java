@@ -1,6 +1,6 @@
 package com.bdpick.controller;
 
-import com.bdpick.config.EntityConfiguration;
+import com.bdpick.config.CommonTestConfiguration;
 import com.bdpick.domain.entity.Keyword;
 import com.bdpick.domain.entity.shop.Shop;
 import com.bdpick.domain.entity.advertisement.AdKeyword;
@@ -34,7 +34,7 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
  * shop ad controller test class
  */
 @WebFluxTest(ShopAdController.class)
-@Import(EntityConfiguration.class)
+@Import(CommonTestConfiguration.class)
 public class ShopAdControllerTest {
     @Autowired
     private WebTestClient webClient;

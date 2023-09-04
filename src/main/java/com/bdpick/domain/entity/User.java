@@ -2,6 +2,7 @@ package com.bdpick.domain.entity;
 
 import com.bdpick.domain.UserType;
 import com.bdpick.domain.entity.shop.Shop;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.Comment;
@@ -45,6 +46,7 @@ public class User implements Serializable {
     @Transient
     private String uuid;
 
+    @JsonBackReference
     @OneToOne(mappedBy = "user")
     private Shop shop;
 
