@@ -37,6 +37,5 @@ public class MailService {
         Vertx vertx = Vertx.vertx();
         MailClient mailClient = MailClient.create(vertx, mailConfig);
         return mailClient.sendMail(message).succeeded();
-
     }
 }

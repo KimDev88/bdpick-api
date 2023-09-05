@@ -9,10 +9,7 @@ import com.bdpick.service.SignService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import static com.bdpick.common.BdConstants.PREFIX_API_URL;
@@ -27,14 +24,6 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 public class SignController {
     private final SignService signService;
     private static final String MSG_NOT_EXIST_EMAIL = "해당 이메일이 존재하지않습니다.";
-
-    //    private final UserRepository userRepository;
-//    private final MailService mailService;
-//    @GetMapping
-//    public Mono<CommonResponse> test() {
-//
-//    }
-
 
 //
 //    private Mono<Boolean> findEmailExist(String email) {
@@ -146,17 +135,24 @@ public class SignController {
 //    }
 //
 //
-//    /**
-//     * check user is existed
-//     *
-//     * @param id user id
-//     * @return true or false
-//     */
-//    @GetMapping("check/{id}")
-//    public Mono<CommonResponse> isAvailableId(@PathVariable("id") String id) {
-//        return Mono.just(new CommonResponse().setData(signService.isAvailableId(id)));
-//    }
-//
+
+    /**
+     * check user is existed
+     *
+     * @param id user id
+     * @return true or false
+     */
+    @GetMapping("check/{id}")
+    public Mono<CommonResponse> isAvailableId(@PathVariable("id") String id) {
+        CommonResponse commonResponse = new CommonResponse();
+        return signService.isAvailableId(id)
+                .map(commonResponse::setData)
+                .onErrorResume(throwable -> {
+                    log.error("error", throwable);
+                    return Mono.just(commonResponse.setError(throwable.getMessage()));
+                });
+    }
+
 
     /**
      * send email to user
@@ -173,6 +169,7 @@ public class SignController {
                 .map(aBoolean -> response.setData(true))
                 .onErrorResume(throwable -> {
                             log.error("error : ", throwable);
+                            // 해당 이메일의 회원이 존재하지 않을 경우
                             if (throwable instanceof RuntimeException
                                     && throwable.getCause() != null
                                     && throwable.getCause().getMessage().equals(BdConstants.Exception.KEY_NO_USER)) {

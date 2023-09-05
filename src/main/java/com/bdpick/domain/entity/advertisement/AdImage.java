@@ -3,6 +3,7 @@ package com.bdpick.domain.entity.advertisement;
 import com.bdpick.domain.AdFileType;
 import com.bdpick.domain.entity.common.CreatedDate;
 import com.bdpick.domain.entity.common.Image;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,6 +24,7 @@ public class AdImage extends CreatedDate implements Serializable {
     @JoinColumn(foreignKey = @ForeignKey(name = "FK_AD_IMAGE_SHOP_AD_ID"))
     @ToString.Exclude
     @Comment("홍보 아이디")
+    @JsonBackReference
     private ShopAd shopAd;
 
     @Enumerated(EnumType.STRING)

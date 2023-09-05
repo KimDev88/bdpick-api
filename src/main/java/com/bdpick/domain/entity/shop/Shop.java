@@ -2,6 +2,7 @@ package com.bdpick.domain.entity.shop;
 
 import com.bdpick.domain.entity.User;
 import com.bdpick.domain.entity.common.AuditDate;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -25,7 +26,7 @@ import java.util.List;
 )
 @EqualsAndHashCode(callSuper = true)
 public class Shop extends AuditDate implements Serializable {
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "FK_SHOP_USER_ID"))
     @ToString.Exclude
     @JsonManagedReference
@@ -61,7 +62,7 @@ public class Shop extends AuditDate implements Serializable {
     @ToString.Exclude
     @OneToMany(mappedBy = "shop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonManagedReference
+    @JsonBackReference
     private List<ShopImage> imageList = new ArrayList<>();
 //    @Transient
 //    private String addressFullName;

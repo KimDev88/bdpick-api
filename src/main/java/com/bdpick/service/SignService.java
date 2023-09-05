@@ -7,6 +7,7 @@ import com.bdpick.domain.entity.Verify;
 import com.bdpick.repository.SignRepository;
 import com.bdpick.repository.UserRepository;
 import com.bdpick.repository.VerifyRepository;
+import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,14 +45,83 @@ public class SignService {
         return factory.withTransaction(session
                         -> signRepository.up(user, session))
                 .thenApply(Mono::justOrEmpty)
-                .exceptionally(throwable -> {
-                    log.error("error", throwable);
-                    return Mono.error(throwable);
-                })
-                .toCompletableFuture()
-                .join();
-
+                .exceptionally(Mono::error)
+                .toCompletableFuture().join();
     }
+//
+//    public Mono<CommonResponse> in(@RequestBody User user) {
+//        CommonResponse response = new CommonResponse();
+//        String userId = user.getId();
+//        String password = user.getPassword();
+//        String uuid = user.getUuid();
+//        AtomicReference<Long> deviceId = new AtomicReference<>();
+//        AtomicReference<String> refreshToken = new AtomicReference<>();
+//
+//        return userRepository.findById(userId)
+//                .defaultIfEmpty(new User())
+//                .<User>handle((existedUser, sink) -> {
+//                    if (existedUser.getId() == null) {
+//                        sink.error(new RuntimeException(ERROR_NO_USER));
+//
+//                    } else if (!Objects.equals(existedUser.getPassword(), password)) {
+//                        sink.error(new RuntimeException(ERROR_NOT_CORRECT));
+//                    } else {
+//                        String accessToken = jwtService.createAccessToken(userId);
+//                        refreshToken.set(jwtService.createRefreshToken());
+//                        Token token = new Token(accessToken, refreshToken.get());
+//                        Map<String, Object> resultMap = new HashMap<>();
+//                        resultMap.put("token", token);
+//                        resultMap.put("userType", existedUser.getType());
+//                        response.setData(resultMap);
+//                        sink.next(existedUser);
+//                    }
+//                })
+//                .flatMap(userRepository::save)
+//                .then(deviceRepository.findDeviceByUserIdAndUuid(userId, uuid))
+//                .doOnNext(device -> deviceId.set(device.getId()))
+//                .hasElement()
+//                .flatMap(aBoolean ->
+//                {
+//                    // 데이터 존재하지 않을 경우 시퀀스 생성
+//                    if (!aBoolean) {
+//                        return deviceRepository.getSequence().zipWith(Mono.just(true));
+//                    } else return Mono.just(deviceId.get()).zipWith(Mono.just(false));
+//                    // 데이터 존재할 경우
+//                })
+//                .flatMap(objects -> {
+//                    Long id = objects.getT1();
+//                    Device device = new Device();
+//                    device.setNew(objects.getT2());
+//                    device.setId(id);
+//                    device.setUserId(userId);
+//                    device.setUuid(uuid);
+//                    device.setRefreshToken(refreshToken.get());
+//                    device.setCreatedAt(LocalDateTime.now());
+//                    return deviceRepository.save(device);
+//                })
+//                .then(Mono.just(response))
+//                .onErrorResume(throwable -> {
+//                    log.error("error : ", throwable);
+//                    if (throwable instanceof RuntimeException) {
+//                        String message = throwable.getMessage();
+//                        switch (message) {
+//                            case ERROR_NO_USER:
+//                                response.setError("해당 계정이 존재하지 않습니다.", false);
+//                                break;
+//                            case ERROR_NOT_CORRECT:
+//                                response.setError("아이디와 패스워드를 확인해주세요.", false);
+//                                break;
+//                            default:
+//                                throw new RuntimeException(throwable);
+//                        }
+//                        return Mono.just(response);
+//                    } else {
+//                        throw new RuntimeException(throwable);
+//                    }
+//                });
+//
+//
+//    }
 
     /**
      * check is id available
@@ -61,10 +131,12 @@ public class SignService {
      */
     public Mono<Boolean> isAvailableId(String id) {
         return factory.withSession(session
-                -> session.find(User.class, id)
+                        -> session.find(User.class, id)
+                )
                 .thenApply(Objects::isNull)
-                .thenApply(Mono::just)).toCompletableFuture().join();
-
+                .thenApply(Mono::just)
+                .exceptionally(Mono::error)
+                .toCompletableFuture().join();
     }
 
     /**
@@ -92,8 +164,8 @@ public class SignService {
      * @param user user
      * @return true : success, false : fail
      */
+    @Transactional
     public Mono<Boolean> sendMail(@RequestBody User user) {
-
         String email = Optional.of(user.getEmail()).orElseThrow(NoSuchFieldError::new);
         String code = RandomStringUtils.randomAlphanumeric(6, 6);
         String subject = "BDPICK 인증번호";
@@ -108,11 +180,11 @@ public class SignService {
                             verify.setCode(code);
                             verify.setEmail(email);
                             session.persist(verify);
-                        })
-                        .thenApply(unused -> {
-                            mailService.sendMail(List.of(email), subject, code);
-                            return Mono.just(true);
                         }))
+                .thenApply(unused -> {
+                    mailService.sendMail(List.of(email), subject, code);
+                    return Mono.just(true);
+                })
                 .exceptionally(Mono::error)
                 .toCompletableFuture().join();
     }
@@ -128,13 +200,11 @@ public class SignService {
         LocalDateTime localDateTime = LocalDateTime.now().minusMinutes(3);
         return factory.withSession(session -> {
                     // 해당 이메일과 코드로 가장 최근 데이터 1건 조회
-                    return verifyRepository.findLastByEmailAndCode(verify, session)
-                            // 생성된 데이터가 현재 시간 -3분보다 이후에 생성됐는지 확인
-                            .thenApply(foundVerify -> Mono.just(foundVerify != null && foundVerify.getCreatedAt().isAfter(localDateTime)));
-                }).exceptionally(Mono::error)
+                    return verifyRepository.findLastByEmailAndCode(verify, session);
+                })
+                // 생성된 데이터가 현재 시간 -3분보다 이후에 생성됐는지 확인
+                .thenApply(foundVerify -> Mono.just(foundVerify != null && foundVerify.getCreatedAt().isAfter(localDateTime)))
+                .exceptionally(Mono::error)
                 .toCompletableFuture().join();
-
-
     }
-
 }

@@ -35,7 +35,7 @@ public class ShopServiceTest {
     @Autowired
     private JwtService jwtService;
 
-    private  String registerNumber;
+    private String registerNumber;
     private Shop shop;
     private ShopAd shopAd = new ShopAd();
     private List<FilePart> filePartList = new ArrayList<>();
@@ -47,7 +47,6 @@ public class ShopServiceTest {
     private Map<String, Object> headerMap = new HashMap<>();
 
     private String userId;
-
 
 
     @BeforeEach
@@ -144,9 +143,22 @@ public class ShopServiceTest {
                 .verifyComplete();
     }
 
+    /**
+     * get shopId by userId
+     */
     @Test
     public void getShopIdByUserId() {
         Assertions.assertNotNull(shopService.getShopIdByUserId(userId));
+    }
+
+    /**
+     * selectShopIsLastCreated
+     */
+    @Test
+    public void selectShopIsLastCreated() {
+        StepVerifier.create(shopService.selectShopIsLastCreated())
+                .expectNextCount(1)
+                .verifyComplete();
     }
 
 }

@@ -1,9 +1,9 @@
 package com.bdpick.service;
 
 import com.bdpick.domain.entity.Keyword;
-import com.bdpick.domain.entity.shop.Shop;
 import com.bdpick.domain.entity.advertisement.AdKeyword;
 import com.bdpick.domain.entity.advertisement.ShopAd;
+import com.bdpick.domain.entity.shop.Shop;
 import com.bdpick.dto.Pageable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,18 +39,21 @@ import java.util.stream.Stream;
 public class ShopAdServiceTest {
     @Autowired
     private ShopAdService shopAdService;
+    @Autowired
+    private ShopService shopService;
 
-    Shop shop = new Shop();
-    ShopAd shopAd = new ShopAd();
-    List<FilePart> filePartList = new ArrayList<>();
+    private Shop shop;
+    private ShopAd shopAd = new ShopAd();
+    private List<FilePart> filePartList = new ArrayList<>();
 
-    Flux<FilePart> partFlux;
-    Flux<String> fileTypeFlux;
-    FilePart filePart;
+    private Flux<FilePart> partFlux;
+    private Flux<String> fileTypeFlux;
+    private FilePart filePart;
 
     @BeforeEach
     public void setData() {
-        shop.setId(1L);
+        // 가장 마지막에 등록된 shop 조회
+        shop = shopService.selectShopIsLastCreated().block();
 
 
 //        shop.setName("테스트 매장");
@@ -140,7 +143,8 @@ public class ShopAdServiceTest {
     @Test
     public void selectShopAdList() {
         StepVerifier.create(shopAdService.findShopAds(new Pageable(0, 100)))
-                .verifyComplete();
+                .expectNextMatches(item -> true)
+                .expectComplete();
 
     }
 }

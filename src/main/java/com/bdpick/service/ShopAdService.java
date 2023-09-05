@@ -31,7 +31,6 @@ public class ShopAdService {
     private final ShopAdRepository shopAdRepository;
     private final AdImageRepository adImageRepository;
 
-
     /**
      * 매장 홍보 생성
      *

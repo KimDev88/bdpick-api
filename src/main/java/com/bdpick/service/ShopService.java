@@ -54,9 +54,8 @@ public class ShopService {
         try {
             String token = BdUtil.getTokenByHeader(headerMap);
             String userId = jwtService.getUserIdByToken(token);
-            return factory.withSession(session -> {
-                        return shopRepository.findShopByUserId(userId, session);
-                    })
+            return factory.withSession(session ->
+                            shopRepository.findShopByUserId(userId, session))
                     .thenApply(shop -> {
                         log.info(shop.toString());
                         return Mono.just(shop);
@@ -66,7 +65,21 @@ public class ShopService {
         } catch (Exception e) {
             return Mono.error(e);
         }
+    }
 
+    /**
+     * select last created shop
+     *
+     * @return last created shop
+     */
+    public Mono<Shop> selectShopIsLastCreated() {
+        return factory.withSession(shopRepository::findShopIsLastCreated)
+                .thenApply(shop -> {
+                    log.info("shop = " + shop);
+                    return Mono.just(shop);
+                })
+                .exceptionally(Mono::error)
+                .toCompletableFuture().join();
     }
 
     /**

@@ -97,7 +97,7 @@ public class ShopAdRepository {
      * @return shop ad list
      */
     public CompletionStage<List<ShopAd>> findShopAds(Pageable pageable, @NonNull Stage.Session session) {
-        return session.createQuery("select ad from ShopAd ad order by id asc", ShopAd.class)
+        return session.createQuery("select ad from ShopAd ad join Shop s on ad.shop = s order by ad.id asc", ShopAd.class)
                 .setFirstResult(pageable.getOffset())
                 .setMaxResults(pageable.getSize())
                 .getResultList();

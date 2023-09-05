@@ -36,12 +36,9 @@ public class ShopRepository {
      * @return found shop
      */
     public Mono<Shop> findShop(Shop shop) {
-        factory.withSession(session -> {
-            return session.find(Shop.class, shop.getId())
-                    .thenAccept(findedShop -> {
-                        System.out.println("shop = " + findedShop);
-                    });
-        }).toCompletableFuture().join();
+        factory.withSession(session -> session.find(Shop.class, shop.getId())
+                        .thenAccept(findedShop -> System.out.println("shop = " + findedShop)))
+                .toCompletableFuture().join();
         return Mono.just(shop);
     }
 
@@ -83,5 +80,18 @@ public class ShopRepository {
                     log.info("rtnShop = " + rtnShop);
                     return rtnShop;
                 });
+    }
+
+    /**
+     * find shop is last created
+     *
+     * @param session session
+     * @return shop
+     */
+    public CompletionStage<Shop> findShopIsLastCreated(Stage.Session session) {
+        return session.createQuery("select s from Shop s order by createdAt desc", Shop.class)
+                .setMaxResults(1)
+                .getSingleResultOrNull()
+                .thenApply(shop -> shop);
     }
 }

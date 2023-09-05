@@ -26,7 +26,7 @@ public class SignServiceTest {
         String email = "yong2407@hanmail.net";
 
         user = new User();
-        user.setId("su240");
+        user.setId("su2407");
         user.setType(UserType.N);
         user.setEmail(email);
         user.setPassword("gs225201");
