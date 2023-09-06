@@ -60,7 +60,7 @@ public class SignService {
 
     @Transactional
     public void test() {
-        factory.withTransaction(session -> session.find(Device.class, 2L)
+        factory.withTransaction(session -> session.find(Device.class, 6L)
                         .thenApply(device -> {
                             device.setPushToken(String.valueOf(Calendar.getInstance().getTimeInMillis()));
                             return device;
