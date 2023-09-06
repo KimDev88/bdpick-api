@@ -1,9 +1,13 @@
 package com.bdpick.service;
 
-import com.bdpick.common.BdConstants;
 import com.bdpick.common.MailService;
+import com.bdpick.common.security.JwtService;
+import com.bdpick.domain.Token;
+import com.bdpick.domain.entity.Device;
 import com.bdpick.domain.entity.User;
 import com.bdpick.domain.entity.Verify;
+import com.bdpick.domain.request.CommonResponse;
+import com.bdpick.repository.DeviceRepository;
 import com.bdpick.repository.SignRepository;
 import com.bdpick.repository.UserRepository;
 import com.bdpick.repository.VerifyRepository;
@@ -18,9 +22,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static com.bdpick.common.BdConstants.Exception.KEY_NOT_CORRECT;
+import static com.bdpick.common.BdConstants.Exception.KEY_NO_USER;
 
 /**
  * sign service class
@@ -34,6 +41,8 @@ public class SignService {
     private final UserRepository userRepository;
     private final VerifyRepository verifyRepository;
     private final MailService mailService;
+    private final JwtService jwtService;
+    private final DeviceRepository deviceRepository;
 
     /**
      * sign up
@@ -48,15 +57,83 @@ public class SignService {
                 .exceptionally(Mono::error)
                 .toCompletableFuture().join();
     }
-//
-//    public Mono<CommonResponse> in(@RequestBody User user) {
-//        CommonResponse response = new CommonResponse();
-//        String userId = user.getId();
-//        String password = user.getPassword();
-//        String uuid = user.getUuid();
-//        AtomicReference<Long> deviceId = new AtomicReference<>();
-//        AtomicReference<String> refreshToken = new AtomicReference<>();
-//
+
+    @Transactional
+    public void test() {
+        factory.withTransaction(session -> session.find(Device.class, 2L)
+                        .thenApply(device -> {
+                            device.setPushToken(String.valueOf(Calendar.getInstance().getTimeInMillis()));
+                            return device;
+                        }))
+                .toCompletableFuture().join();
+    }
+
+    /**
+     * sign in
+     *
+     * @param user user
+     * @return true :
+     */
+    @Transactional
+    public Mono<Map<String, Object>> in(@RequestBody User user) {
+        CommonResponse response = new CommonResponse();
+        String userId = user.getId();
+        String password = user.getPassword();
+        String uuid = user.getUuid();
+        AtomicReference<Long> deviceId = new AtomicReference<>();
+        AtomicReference<String> refreshToken = new AtomicReference<>();
+        Map<String, Object> resultMap = new HashMap<>();
+
+        return factory.withTransaction(session ->
+                        userRepository.findById(userId, session)
+                                .thenCompose(rtnUser -> {
+                                    log.info("rtnUser = " + rtnUser);
+                                    // 해당 아이디가 존재하지 않을 경우
+                                    if (rtnUser == null) {
+                                        throw new RuntimeException(KEY_NO_USER);
+                                    }
+                                    // 입력 패스워드가 일치하지 않을 경우
+                                    else if (!rtnUser.getPassword().equals(user.getPassword())) {
+                                        throw new RuntimeException(KEY_NOT_CORRECT);
+                                    } else {
+
+                                        String accessToken = jwtService.createAccessToken(userId);
+                                        refreshToken.set(jwtService.createRefreshToken());
+                                        Token token = new Token(accessToken, refreshToken.get());
+                                        resultMap.put("token", token);
+                                        resultMap.put("userType", rtnUser.getType());
+                                        response.setData(resultMap);
+
+                                        Device device = new Device();
+                                        device.setUser(rtnUser);
+                                        device.setUuid(uuid);
+                                        device.setPushToken("TEMP");
+                                        device.setRefreshToken(refreshToken.get());
+
+                                        return deviceRepository.findDeviceByUserAndUuid(device, session)
+                                                .thenCompose(foundDevice -> {
+                                                    log.info("foundDevice = " + foundDevice);
+                                                    // 기존 데이터가 없을 경우 Create
+                                                    if (foundDevice == null) {
+                                                        foundDevice = device;
+                                                    }
+                                                    // 기존 데이터가 존재할 경우 update
+                                                    else {
+                                                        foundDevice.setPushToken("CHANGE");
+                                                        foundDevice.setRefreshToken(refreshToken.get());
+                                                    }
+                                                    return deviceRepository.save(foundDevice, session)
+                                                            .thenCompose(device1 -> {
+                                                                return CompletableFuture.completedStage(resultMap);
+                                                            });
+                                                });
+                                    }
+                                })
+                )
+                .thenApply(Mono::just)
+                .exceptionally(Mono::error)
+                .toCompletableFuture().join();
+
 //        return userRepository.findById(userId)
 //                .defaultIfEmpty(new User())
 //                .<User>handle((existedUser, sink) -> {
@@ -119,9 +196,9 @@ public class SignService {
 //                        throw new RuntimeException(throwable);
 //                    }
 //                });
-//
-//
-//    }
+
+
+    }
 
     /**
      * check is id available
@@ -174,7 +251,7 @@ public class SignService {
                         -> userRepository.findByEmail(email, session)
                         .thenAccept((foundUser) -> {
                             if (foundUser == null) {
-                                throw new RuntimeException(BdConstants.Exception.KEY_NO_USER);
+                                throw new RuntimeException(KEY_NO_USER);
                             }
                             Verify verify = new Verify();
                             verify.setCode(code);

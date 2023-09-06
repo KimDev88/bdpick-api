@@ -30,11 +30,20 @@ public class SignServiceTest {
         user.setType(UserType.N);
         user.setEmail(email);
         user.setPassword("gs225201");
+        user.setUuid("TEST");
 
         verify = new Verify();
         verify.setEmail(email);
         verify.setCode("DM778W");
 
+    }
+
+    @Test
+    public void test() {
+        signService.test();
+//        StepVerifier.create(signService.test(user))
+//                .expectNext()
+//                .verifyComplete();
     }
 
 
@@ -62,6 +71,18 @@ public class SignServiceTest {
 //                }).verifyComplete();
 
 
+    }
+
+    /**
+     * sign in test
+     */
+    @Test
+    public void in() {
+        StepVerifier.create(signService.in(user))
+                .expectNextMatches(stringObjectMap ->
+                        stringObjectMap != null && !stringObjectMap.isEmpty()
+                )
+                .verifyComplete();
     }
 
     /**

@@ -1,7 +1,9 @@
 package com.bdpick.repository;
 
 import com.bdpick.domain.entity.User;
+import io.smallrye.mutiny.Uni;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.reactive.mutiny.Mutiny;
 import org.hibernate.reactive.stage.Stage;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +13,13 @@ import java.util.concurrent.CompletionStage;
 @RequiredArgsConstructor
 public class UserRepository {
 
+    /**
+     * find user
+     *
+     * @param id      id
+     * @param session session
+     * @return found user
+     */
     public CompletionStage<User> findById(String id, Stage.Session session) {
         return session.find(User.class, id);
     }

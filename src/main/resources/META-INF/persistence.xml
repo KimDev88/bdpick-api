@@ -9,6 +9,7 @@
         <class>com.bdpick.domain.entity.BdFile</class>
         <class>com.bdpick.domain.entity.User</class>
         <class>com.bdpick.domain.entity.Verify</class>
+        <class>com.bdpick.domain.entity.Device</class>
         <class>com.bdpick.domain.entity.shop.Shop</class>
         <class>com.bdpick.domain.entity.shop.ShopImage</class>
         <class>com.bdpick.domain.entity.advertisement.AdImage</class>
@@ -24,6 +25,7 @@
             <!-- SQL statement logging -->
             <property name="hibernate.format_sql" value="true"/>
             <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.highlight_sql" value="true"/>
 
             <!-- Automatic schema export -->
             <property name="jakarta.persistence.schema-generation.database.action"

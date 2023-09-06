@@ -53,7 +53,7 @@ dependencies {
     // jpa, hibernate
 //    implementation 'org.hibernate.orm:hibernate-core:6.2.8.Final'
 //    implementation 'org.hibernate.reactive:hibernate-reactive-core:2.0.5.Final'
-    implementation 'org.hibernate.reactive:hibernate-reactive-core:2.0.4.Final'
+    implementation 'org.hibernate.reactive:hibernate-reactive-core:2.0.1.Final'
     implementation 'io.vertx:vertx-mysql-client:4.4.5'
 //    implementation 'cz.encircled:joiner-reactive:0.4.7'
 
