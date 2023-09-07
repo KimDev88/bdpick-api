@@ -28,6 +28,20 @@ public class DeviceRepository {
     }
 
     /**
+     * find device by user and uuid
+     *
+     * @param device  device
+     * @param session session
+     * @return device
+     */
+    public CompletionStage<Device> findDeviceByUserIdAndRefreshToken(Device device, Stage.Session session) {
+        return session.createQuery("select d from Device d where d.user = :user and d.refreshToken = :refreshToken", Device.class)
+                .setParameter("user", device.getUser())
+                .setParameter("refreshToken", device.getRefreshToken())
+                .getSingleResultOrNull();
+    }
+
+    /**
      * save device
      *
      * @param device  device

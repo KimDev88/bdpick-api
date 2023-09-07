@@ -91,7 +91,6 @@ public class ShopService {
      * @param shop       shop
      * @return created shop
      */
-    @Transactional
     public Mono<Shop> createShop(@NonNull Map<String, Object> headerMap,
                                  @NonNull Flux<FilePart> files,
                                  @NonNull Flux<String> filesTypes,

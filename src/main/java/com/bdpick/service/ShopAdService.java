@@ -37,7 +37,6 @@ public class ShopAdService {
      * @param shopAd 홍보 정보
      * @return 생성된 홍보 id
      */
-    @Transactional
     public Mono<ShopAd> createShopAd(Map<String, Object> headerMap, Flux<FilePart> filePartFlux, Flux<String> typeFlux, ShopAd shopAd) {
         return factory.withTransaction((session, transaction) ->
                                 // FIXME headerMap을 이용하여 shopId 조회하여 해당 shop 정보 shopAd의 add 필요

@@ -1,6 +1,6 @@
 package com.bdpick.domain.entity;
 
-import com.bdpick.domain.entity.common.CreatedDate;
+import com.bdpick.domain.entity.common.AuditDate;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Device extends CreatedDate implements Serializable {
+public class Device extends AuditDate implements Serializable {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(foreignKey = @ForeignKey(name = "FK_DEVICE_USER_ID"), nullable = false)
     private User user;

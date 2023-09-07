@@ -43,9 +43,6 @@ public class User implements Serializable {
     @Comment("수정일")
     private LocalDateTime updatedAt;
 
-    @Transient
-    private String uuid;
-
     @JsonBackReference
     @OneToOne(mappedBy = "user")
     private Shop shop;

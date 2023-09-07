@@ -69,7 +69,6 @@ public class ShopController {
      * @param shop       shop
      * @return created shop
      */
-    @Transactional
     @PostMapping
     public Mono<CommonResponse> createShop(@RequestHeader Map<String, Object> headerMap,
                                            @RequestPart("files") Flux<FilePart> files,

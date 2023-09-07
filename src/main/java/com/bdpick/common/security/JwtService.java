@@ -55,11 +55,14 @@ public class JwtService {
         claims.setIssuer("BDPICK");
         LocalDateTime time = LocalDateTime.now();
         switch (type) {
+            // access token
             case A -> {
 //                time = time.plusMinutes(5);
                 time = time.plusYears(1);
                 claims.put("id", id);
             }
+            // refresh token
+//            case R -> time = time.plusSeconds(5);
             case R -> time = time.plusDays(5);
         }
         Date expiredDate = Date.from(time.atZone(ZoneId.systemDefault()).toInstant());

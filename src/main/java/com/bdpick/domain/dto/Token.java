@@ -1,8 +1,11 @@
-package com.bdpick.domain;
+package com.bdpick.domain.dto;
 
 
 import lombok.Data;
 
+/**
+ * user token object class
+ */
 @Data
 public class Token {
     public Token(String accessToken, String refreshToken) {

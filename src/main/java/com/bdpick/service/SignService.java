@@ -2,32 +2,34 @@ package com.bdpick.service;
 
 import com.bdpick.common.MailService;
 import com.bdpick.common.security.JwtService;
-import com.bdpick.domain.Token;
+import com.bdpick.domain.dto.SignInDto;
+import com.bdpick.domain.dto.Token;
+import com.bdpick.domain.dto.UserDto;
 import com.bdpick.domain.entity.Device;
 import com.bdpick.domain.entity.User;
 import com.bdpick.domain.entity.Verify;
-import com.bdpick.domain.request.CommonResponse;
+import com.bdpick.mapper.UserMapper;
 import com.bdpick.repository.DeviceRepository;
 import com.bdpick.repository.SignRepository;
 import com.bdpick.repository.UserRepository;
 import com.bdpick.repository.VerifyRepository;
-import jakarta.transaction.Transactional;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.reactive.stage.Stage;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.bdpick.common.BdConstants.Exception.KEY_NOT_CORRECT;
-import static com.bdpick.common.BdConstants.Exception.KEY_NO_USER;
+import static com.bdpick.common.BdConstants.Exception.*;
 
 /**
  * sign service class
@@ -50,7 +52,7 @@ public class SignService {
      * @param user 등록할 user
      * @return 등록된 user
      */
-    public Mono<User> up(@RequestBody User user) {
+    public Mono<User> up(@NonNull User user) {
         return factory.withTransaction(session
                         -> signRepository.up(user, session))
                 .thenApply(Mono::justOrEmpty)
@@ -58,31 +60,20 @@ public class SignService {
                 .toCompletableFuture().join();
     }
 
-    @Transactional
-    public void test() {
-        factory.withTransaction(session -> session.find(Device.class, 6L)
-                        .thenApply(device -> {
-                            device.setPushToken(String.valueOf(Calendar.getInstance().getTimeInMillis()));
-                            return device;
-                        }))
-                .toCompletableFuture().join();
-    }
-
     /**
      * sign in
      *
      * @param user user
-     * @return true :
+     * @return SignInDto
+     * token : accessToken, refreshToken
+     * Type : userType
      */
-    @Transactional
-    public Mono<Map<String, Object>> in(@RequestBody User user) {
-        CommonResponse response = new CommonResponse();
+    public Mono<SignInDto> in(@NonNull UserDto user) {
+        SignInDto signInDto = new SignInDto();
         String userId = user.getId();
         String password = user.getPassword();
         String uuid = user.getUuid();
-        AtomicReference<Long> deviceId = new AtomicReference<>();
         AtomicReference<String> refreshToken = new AtomicReference<>();
-        Map<String, Object> resultMap = new HashMap<>();
 
         return factory.withTransaction(session ->
                         userRepository.findById(userId, session)
@@ -93,16 +84,15 @@ public class SignService {
                                         throw new RuntimeException(KEY_NO_USER);
                                     }
                                     // 입력 패스워드가 일치하지 않을 경우
-                                    else if (!rtnUser.getPassword().equals(user.getPassword())) {
+                                    else if (!rtnUser.getPassword().equals(password)) {
                                         throw new RuntimeException(KEY_NOT_CORRECT);
                                     } else {
 
                                         String accessToken = jwtService.createAccessToken(userId);
                                         refreshToken.set(jwtService.createRefreshToken());
                                         Token token = new Token(accessToken, refreshToken.get());
-                                        resultMap.put("token", token);
-                                        resultMap.put("userType", rtnUser.getType());
-                                        response.setData(resultMap);
+                                        signInDto.setToken(token);
+                                        signInDto.setUserType(rtnUser.getType());
 
                                         Device device = new Device();
                                         device.setUser(rtnUser);
@@ -123,9 +113,7 @@ public class SignService {
                                                         foundDevice.setRefreshToken(refreshToken.get());
                                                     }
                                                     return deviceRepository.save(foundDevice, session)
-                                                            .thenCompose(device1 -> {
-                                                                return CompletableFuture.completedStage(resultMap);
-                                                            });
+                                                            .thenCompose(unused -> CompletableFuture.completedStage(signInDto));
                                                 });
                                     }
                                 })
@@ -133,71 +121,60 @@ public class SignService {
                 .thenApply(Mono::just)
                 .exceptionally(Mono::error)
                 .toCompletableFuture().join();
+    }
 
-//        return userRepository.findById(userId)
-//                .defaultIfEmpty(new User())
-//                .<User>handle((existedUser, sink) -> {
-//                    if (existedUser.getId() == null) {
-//                        sink.error(new RuntimeException(ERROR_NO_USER));
-//
-//                    } else if (!Objects.equals(existedUser.getPassword(), password)) {
-//                        sink.error(new RuntimeException(ERROR_NOT_CORRECT));
-//                    } else {
-//                        String accessToken = jwtService.createAccessToken(userId);
-//                        refreshToken.set(jwtService.createRefreshToken());
-//                        Token token = new Token(accessToken, refreshToken.get());
-//                        Map<String, Object> resultMap = new HashMap<>();
-//                        resultMap.put("token", token);
-//                        resultMap.put("userType", existedUser.getType());
-//                        response.setData(resultMap);
-//                        sink.next(existedUser);
-//                    }
-//                })
-//                .flatMap(userRepository::save)
-//                .then(deviceRepository.findDeviceByUserIdAndUuid(userId, uuid))
-//                .doOnNext(device -> deviceId.set(device.getId()))
-//                .hasElement()
-//                .flatMap(aBoolean ->
-//                {
-//                    // 데이터 존재하지 않을 경우 시퀀스 생성
-//                    if (!aBoolean) {
-//                        return deviceRepository.getSequence().zipWith(Mono.just(true));
-//                    } else return Mono.just(deviceId.get()).zipWith(Mono.just(false));
-//                    // 데이터 존재할 경우
-//                })
-//                .flatMap(objects -> {
-//                    Long id = objects.getT1();
-//                    Device device = new Device();
-//                    device.setNew(objects.getT2());
-//                    device.setId(id);
-//                    device.setUserId(userId);
-//                    device.setUuid(uuid);
-//                    device.setRefreshToken(refreshToken.get());
-//                    device.setCreatedAt(LocalDateTime.now());
-//                    return deviceRepository.save(device);
-//                })
-//                .then(Mono.just(response))
-//                .onErrorResume(throwable -> {
-//                    log.error("error : ", throwable);
-//                    if (throwable instanceof RuntimeException) {
-//                        String message = throwable.getMessage();
-//                        switch (message) {
-//                            case ERROR_NO_USER:
-//                                response.setError("해당 계정이 존재하지 않습니다.", false);
-//                                break;
-//                            case ERROR_NOT_CORRECT:
-//                                response.setError("아이디와 패스워드를 확인해주세요.", false);
-//                                break;
-//                            default:
-//                                throw new RuntimeException(throwable);
-//                        }
-//                        return Mono.just(response);
-//                    } else {
-//                        throw new RuntimeException(throwable);
-//                    }
-//                });
+    /**
+     * access 토큰 만료 시 리프레시 토큰으로 새 토큰을 발급하고 리턴한다.
+     *
+     * @param token token
+     * @return SignInDto
+     */
+    public Mono<SignInDto> renewToken(@NonNull Token token) {
+        String refreshToken = token.getRefreshToken();
+        String accessToken = token.getAccessToken();
+        String userId = jwtService.getUserIdByToken(accessToken);
+        AtomicReference<UserDto> rtnUser = new AtomicReference<>();
 
+        try {
+            jwtService.verifyToken(refreshToken);
 
+            Device device = new Device();
+            User user = new User();
+            user.setId(userId);
+            device.setRefreshToken(refreshToken);
+            device.setUser(user);
+
+            factory.withTransaction(session -> deviceRepository.findDeviceByUserIdAndRefreshToken(device, session)
+                            .thenCompose(foundDevice -> {
+                                if (foundDevice != null) {
+                                    return userRepository.findById(userId, session)
+                                            .thenApply(foundUser -> {
+                                                UserDto userDto = UserMapper.INSTANCE.userToDto(foundUser);
+                                                userDto.setUuid(foundDevice.getUuid());
+                                                return userDto;
+                                            });
+                                }
+                                // 리프레시 토큰이 db와 일치하지 않을 경우
+                                else {
+                                    throw new RuntimeException(KEY_TOKEN_IS_NOT_CORRECT);
+                                }
+                            }))
+                    .thenApply(userDto -> {
+                        rtnUser.set(userDto);
+                        return rtnUser;
+                    })
+                    .toCompletableFuture().join();
+            return in(rtnUser.get());
+
+        } catch (Exception e) {
+            log.error("error : ", e);
+            // 리프레시 토큰 만료 시
+            if (e instanceof ExpiredJwtException) {
+                return Mono.error(new RuntimeException(KEY_TOKEN_EXPIRED));
+            } else {
+                return Mono.error(e);
+            }
+        }
     }
 
     /**
@@ -206,7 +183,7 @@ public class SignService {
      * @param id checking id
      * @return true : available , false : unavailable
      */
-    public Mono<Boolean> isAvailableId(String id) {
+    public Mono<Boolean> isAvailableId(@NonNull String id) {
         return factory.withSession(session
                         -> session.find(User.class, id)
                 )
@@ -241,8 +218,7 @@ public class SignService {
      * @param user user
      * @return true : success, false : fail
      */
-    @Transactional
-    public Mono<Boolean> sendMail(@RequestBody User user) {
+    public Mono<Boolean> sendMail(@NonNull User user) {
         String email = Optional.of(user.getEmail()).orElseThrow(NoSuchFieldError::new);
         String code = RandomStringUtils.randomAlphanumeric(6, 6);
         String subject = "BDPICK 인증번호";

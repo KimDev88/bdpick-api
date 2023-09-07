@@ -29,7 +29,6 @@ public class ShopAdRepository {
      * @param shopAd entity
      * @return saved entity
      */
-    @Transactional
     public CompletionStage<ShopAd> save(ShopAd shopAd, Stage.Session session) {
         // 쿼리를 위해 키워드 리스트 중 키워트 문자열만 추출
         List<String> keywordStrList = shopAd.getKeywordList()

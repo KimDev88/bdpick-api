@@ -17,6 +17,13 @@ public class CommonResponse implements Serializable {
         return this;
     }
 
+    public CommonResponse setError(String code, String message, Object data) {
+        this.code = code;
+        this.message = message;
+        this.data = data;
+        return this;
+    }
+
     public CommonResponse setError(String message, Object data) {
         code = ResponseCode.CODE_ERROR;
         this.message = message;
