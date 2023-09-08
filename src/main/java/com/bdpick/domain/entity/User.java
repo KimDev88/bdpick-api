@@ -8,15 +8,20 @@ import lombok.Data;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(name = "UNQ_EMAIL", columnNames = {"email"}))
 //public class User extends AuditDate implements Serializable, UserDetails {
-public class User implements Serializable {
+public class User implements Serializable, UserDetails {
     @Id
     @Column(length = 100)
     @Comment("회원 아이디")
@@ -47,35 +52,36 @@ public class User implements Serializable {
     @OneToOne(mappedBy = "user")
     private Shop shop;
 
+    @Transient
+    private List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
 
-//
-//    @Override
-//    public Collection<? extends GrantedAuthority> getAuthorities() {
-//        return null;
-//    }
-//
-//    @Override
-//    public String getUsername() {
-//        return null;
-//    }
-//
-//    @Override
-//    public boolean isAccountNonExpired() {
-//        return false;
-//    }
-//
-//    @Override
-//    public boolean isAccountNonLocked() {
-//        return false;
-//    }
-//
-//    @Override
-//    public boolean isCredentialsNonExpired() {
-//        return false;
-//    }
-//
-//    @Override
-//    public boolean isEnabled() {
-//        return false;
-//    }
+    @Override
+    public Collection<GrantedAuthority> getAuthorities() {
+        return grantedAuthorities;
+    }
+
+    @Override
+    public String getUsername() {
+        return id;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

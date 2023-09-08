@@ -2,7 +2,7 @@ package com.bdpick.controller;
 
 import com.bdpick.domain.entity.advertisement.ShopAd;
 import com.bdpick.domain.request.CommonResponse;
-import com.bdpick.dto.Pageable;
+import com.bdpick.domain.dto.Pageable;
 import com.bdpick.service.ShopAdService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

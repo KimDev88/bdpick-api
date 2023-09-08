@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
@@ -77,6 +78,7 @@ public class ShopAdControllerTest {
      * create shop ad api test
      */
     @Test
+    @WithMockUser(value = "su2407", password = "gs225201")
     public void createShopAdUrlApiTest() {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("files", new ClassPathResource("/META-INF/persistence.xml"));

@@ -12,7 +12,6 @@ import com.bdpick.domain.entity.shop.ShopImage;
 import com.bdpick.domain.request.CommonResponse;
 import com.bdpick.repository.ShopRepository;
 import io.vertx.sqlclient.Tuple;
-import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

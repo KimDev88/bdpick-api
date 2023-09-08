@@ -1,4 +1,4 @@
-package com.bdpick.dto;
+package com.bdpick.domain.dto;
 
 import lombok.Data;
 

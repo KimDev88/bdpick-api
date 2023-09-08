@@ -12,7 +12,7 @@ import org.mapstruct.factory.Mappers;
 public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
-    UserDto userToDto(User user);
+    UserDto userToDto(User user, String uuid);
 
 
 }

@@ -149,8 +149,8 @@ public class SignService {
                                 if (foundDevice != null) {
                                     return userRepository.findById(userId, session)
                                             .thenApply(foundUser -> {
-                                                UserDto userDto = UserMapper.INSTANCE.userToDto(foundUser);
-                                                userDto.setUuid(foundDevice.getUuid());
+                                                UserDto userDto = UserMapper.INSTANCE.userToDto(foundUser, foundDevice.getUuid());
+//                                                userDto.setUuid(foundDevice.getUuid());
                                                 return userDto;
                                             });
                                 }
