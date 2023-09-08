@@ -79,7 +79,7 @@ public class ShopAdControllerTest {
     @Test
     public void createShopAdUrlApiTest() {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
-        builder.part("files", new ClassPathResource("oci_config"));
+        builder.part("files", new ClassPathResource("/META-INF/persistence.xml"));
         builder.part("fileTypes", "A1");
         builder.part("shop", shopAd);
 

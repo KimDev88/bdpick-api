@@ -90,7 +90,7 @@ public class ShopControllerTest {
     @Test
     public void createShopApiTest() {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
-        builder.part("files", new ClassPathResource("oci_config"));
+        builder.part("files", new ClassPathResource("/META-INF/persistence.xml"));
         builder.part("fileTypes", "S1");
         builder.part("shop", shop);
 
