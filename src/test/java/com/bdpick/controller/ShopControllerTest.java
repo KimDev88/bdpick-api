@@ -1,9 +1,8 @@
 package com.bdpick.controller;
 
 import com.bdpick.common.security.JwtService;
-import com.bdpick.config.CommonTestConfiguration;
+import com.bdpick.config.TestConfiguration;
 import com.bdpick.domain.entity.User;
-import com.bdpick.domain.entity.advertisement.ShopAd;
 import com.bdpick.domain.entity.shop.Shop;
 import com.bdpick.domain.request.CommonResponse;
 import com.bdpick.repository.ShopRepository;
@@ -15,14 +14,17 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 
@@ -30,10 +32,9 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
  * shop ad controller test class
  */
 @WebFluxTest(ShopController.class)
-@Import(CommonTestConfiguration.class)
+@Import(TestConfiguration.class)
 public class ShopControllerTest {
-    @Autowired
-    private WebTestClient webClient;
+
 
     @SpyBean
     private ShopService shopService;
@@ -45,11 +46,16 @@ public class ShopControllerTest {
     @Autowired
     Map<String, Object> headerMap;
 
+    private WebTestClient webClient;
+    Consumer<HttpHeaders> headers;
+
     Shop shop;
-    ShopAd shopAd;
 
     @BeforeEach
     public void stub() {
+        webClient = TestConfiguration.getWebTestClient();
+        headers = TestConfiguration.getCommonClientHeaders();
+
         shop = new Shop();
         User user = new User();
         user.setId("su2407");
@@ -68,11 +74,10 @@ public class ShopControllerTest {
      * select my shop info
      */
     @Test
+    @WithMockUser
     public void selectMyShopApiTest() {
         webClient.get().uri(PREFIX_API_URL + "/shops/this")
-                .headers(httpHeaders -> {
-                    httpHeaders.add("authorization", "Bearer " + jwtService.createAccessToken("su2407"));
-                })
+                .headers(headers)
                 .exchange()
                 .expectAll(responseSpec -> {
                     responseSpec.expectStatus().isOk();
@@ -88,18 +93,20 @@ public class ShopControllerTest {
      * create shop ad api test
      */
     @Test
+    @WithMockUser
     public void createShopApiTest() {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("files", new ClassPathResource("/META-INF/persistence.xml"));
         builder.part("fileTypes", "S1");
         builder.part("shop", shop);
 
-        webClient.post().uri(PREFIX_API_URL + "/shops")
-                .headers(httpHeaders -> {
-                    httpHeaders.add("authorization", "Bearer " + jwtService.createAccessToken("su2407"));
-                })
+        // 공통헤더 설정
+        webClient
+                .post().uri(PREFIX_API_URL + "/shops")
+                .headers(headers)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(builder.build()))
+                .headers(TestConfiguration.getCommonClientHeaders())
                 .exchange()
                 .expectAll(responseSpec -> {
                     responseSpec.expectStatus().isOk();
@@ -114,8 +121,10 @@ public class ShopControllerTest {
      * check register number is available
      */
     @Test
+    @WithMockUser
     public void checkRegisterApiTest() {
         webClient.post().uri(PREFIX_API_URL + "/shops/check-register")
+                .headers(headers)
                 .body(Mono.just(shop), Shop.class)
                 .exchange()
                 .expectAll(responseSpec -> {

@@ -19,18 +19,12 @@ import java.util.Objects;
 @Service
 @Slf4j
 public class JwtService {
-    private final Key secretKey;
-//    private final ShopRepository shopRepository;
-//    private final Stage.SessionFactory factory;
+    private static Key secretKey;
 
-
-    //    public JwtService(@Value("${jwtSecretKey}") String secretKey, ShopRepository shopRepository, Stage.SessionFactory factory) {
-    public JwtService(@Value("${jwtSecretKey}") String secretKey) {
-//        this.shopRepository = shopRepository;
-//        this.factory = factory;
-
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+    @Value("${jwtSecretKey}")
+    public void setSecretKey(String stringKey) {
+        byte[] keyBytes = Decoders.BASE64.decode(stringKey);
+        JwtService.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
 //    public Boolean validateToken(String token) {
@@ -42,15 +36,15 @@ public class JwtService {
 //        }
 //    }
 
-    public String createAccessToken(String userId) {
+    public static String createAccessToken(String userId) {
         return createToken(TokenType.A, userId);
     }
 
-    public String createRefreshToken() {
+    public static String createRefreshToken() {
         return createToken(TokenType.R, null);
     }
 
-    private String createToken(TokenType type, String id) {
+    private static String createToken(TokenType type, String id) {
         Claims claims = Jwts.claims().setSubject(type.name()); // sub
         claims.setIssuer("BDPICK");
         LocalDateTime time = LocalDateTime.now();
@@ -124,7 +118,7 @@ public class JwtService {
 //        return null;
     }
 
-    public String getUserIdByHeaderMap(Map<String, Object> headerMap) {
+    public String getUserIdByHeaderMap(Map<String, Object> headerMap) throws Exception {
         return Objects.requireNonNull(verifyToken(BdUtil.getTokenByHeader(headerMap)))
                 .getBody()
                 .get("id", String.class);

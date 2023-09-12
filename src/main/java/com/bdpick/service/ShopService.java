@@ -95,11 +95,17 @@ public class ShopService {
                                  @NonNull Flux<String> filesTypes,
                                  @NonNull Shop shop) {
         List<ShopImage> imageList = new ArrayList<>();
-        // token 에서 회원정보 추출
-        String userId = jwtService.getUserIdByHeaderMap(headerMap);
-        User user = new User();
-        user.setId(userId);
-        shop.setUser(user);
+        try {
+            // token 에서 회원정보 추출
+            String userId = jwtService.getUserIdByHeaderMap(headerMap);
+            User user = new User();
+            user.setId(userId);
+            shop.setUser(user);
+        } catch (Exception e) {
+            log.error("error : ", e);
+            return Mono.error(e);
+        }
+
 
         return factory.withTransaction(session -> {
                     // 사업자등록번호로 조회

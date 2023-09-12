@@ -1,6 +1,6 @@
 package com.bdpick.controller;
 
-import com.bdpick.config.CommonTestConfiguration;
+import com.bdpick.config.TestConfiguration;
 import com.bdpick.domain.entity.Keyword;
 import com.bdpick.domain.entity.advertisement.AdKeyword;
 import com.bdpick.domain.entity.advertisement.ShopAd;
@@ -11,11 +11,11 @@ import com.bdpick.repository.ShopAdRepository;
 import com.bdpick.service.ShopAdService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,10 +36,8 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
  * shop ad controller test class
  */
 @WebFluxTest(ShopAdController.class)
-@Import(CommonTestConfiguration.class)
+@Import(TestConfiguration.class)
 public class ShopAdControllerTest {
-    @Autowired
-    private WebTestClient webClient;
 
     @SpyBean
     private ShopAdService shopAdService;
@@ -50,8 +49,14 @@ public class ShopAdControllerTest {
     Shop shop;
     ShopAd shopAd;
 
+    private WebTestClient webClient;
+    Consumer<HttpHeaders> headers;
+
     @BeforeEach
     public void stub() {
+        webClient = TestConfiguration.getWebTestClient();
+        headers = TestConfiguration.getCommonClientHeaders();
+
         shop = new Shop();
         shop.setId(1L);
 
@@ -78,7 +83,7 @@ public class ShopAdControllerTest {
      * create shop ad api test
      */
     @Test
-    @WithMockUser(value = "su2407", password = "gs225201")
+    @WithMockUser
     public void createShopAdUrlApiTest() {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("files", new ClassPathResource("/META-INF/persistence.xml"));
@@ -86,6 +91,7 @@ public class ShopAdControllerTest {
         builder.part("shop", shopAd);
 
         webClient.post().uri(PREFIX_API_URL + "/shop-ads")
+                .headers(headers)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(builder.build()))
                 .exchange()
@@ -102,8 +108,10 @@ public class ShopAdControllerTest {
      * find shop ads test
      */
     @Test
+    @WithMockUser
     public void findShopAds() {
         webClient.get().uri(PREFIX_API_URL + "/shop-ads")
+                .headers(headers)
                 .exchange()
                 .expectAll(responseSpec -> {
                     responseSpec.expectStatus().isOk();

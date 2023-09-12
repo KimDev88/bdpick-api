@@ -7,8 +7,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -24,7 +25,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
-@Log4j2
+@Slf4j
 public class BdUtil {
     static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -41,7 +42,7 @@ public class BdUtil {
      * @param headerMap request header map
      * @return jwt token
      */
-    public static String getTokenByHeader(Map<String, Object> headerMap) {
+    public static String getTokenByHeader(Map<String, Object> headerMap) throws Exception {
         Optional<Map<String, Object>> optionalMap = Optional.ofNullable(headerMap);
         return optionalMap.stream()
                 .map(stringObjectMap -> (String) stringObjectMap.get("authorization"))
@@ -116,5 +117,18 @@ public class BdUtil {
         return objectMapper.convertValue(object, toValueType);
     }
 
+    /**
+     * get bean from applicationContext
+     *
+     * @param beanId       beanId
+     * @param requiredType required class type
+     * @param <T>          object type
+     * @return bean object
+     */
+    public static <T> T getBean(String beanId, Class<T> requiredType) {
+
+        ApplicationContext context = ApplicationContextProvider.getApplicationContext();
+        return context.getBean(beanId, requiredType);
+    }
 }
 
