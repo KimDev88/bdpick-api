@@ -1,8 +1,8 @@
-package com.bdpick.controller;
+package com.bdpick.shop.web.rest;
 
-import com.bdpick.domain.entity.shop.Shop;
 import com.bdpick.domain.request.CommonResponse;
-import com.bdpick.service.ShopService;
+import com.bdpick.shop.domain.Shop;
+import com.bdpick.shop.service.impl.ShopService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.codec.multipart.FilePart;
@@ -18,13 +18,13 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 
 
 /**
- * shop controller
+ * shop resource
  */
 @RestController
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping(value = PREFIX_API_URL + "/shops")
-public class ShopController {
+public class ShopResource {
     private final ShopService shopService;
 
     /**

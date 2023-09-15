@@ -3,10 +3,11 @@ package com.bdpick.controller;
 import com.bdpick.common.security.JwtService;
 import com.bdpick.config.TestConfiguration;
 import com.bdpick.domain.entity.User;
-import com.bdpick.domain.entity.shop.Shop;
 import com.bdpick.domain.request.CommonResponse;
-import com.bdpick.repository.ShopRepository;
-import com.bdpick.service.ShopService;
+import com.bdpick.shop.domain.Shop;
+import com.bdpick.shop.repository.impl.ShopRepositoryImpl;
+import com.bdpick.shop.service.ShopServiceImpl;
+import com.bdpick.shop.web.rest.ShopResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,15 +32,13 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 /**
  * shop ad controller test class
  */
-@WebFluxTest(ShopController.class)
+@WebFluxTest(ShopResource.class)
 @Import(TestConfiguration.class)
-public class ShopControllerTest {
-
-
+public class ShopResourceTest {
     @SpyBean
-    private ShopService shopService;
+    private ShopServiceImpl shopService;
     @SpyBean
-    private ShopRepository shopRepository;
+    private ShopRepositoryImpl shopRepositoryImpl;
     @SpyBean
     private JwtService jwtService;
 

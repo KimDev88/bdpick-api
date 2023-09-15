@@ -1,4 +1,4 @@
-package com.bdpick.service;
+package com.bdpick.shop.service;
 
 import com.bdpick.common.BdConstants;
 import com.bdpick.common.BdUtil;
@@ -7,10 +7,11 @@ import com.bdpick.domain.ShopFileType;
 import com.bdpick.domain.entity.BdFile;
 import com.bdpick.domain.entity.User;
 import com.bdpick.domain.entity.common.Image;
-import com.bdpick.domain.entity.shop.Shop;
-import com.bdpick.domain.entity.shop.ShopImage;
+import com.bdpick.shop.domain.Shop;
+import com.bdpick.shop.domain.ShopImage;
 import com.bdpick.domain.request.CommonResponse;
-import com.bdpick.repository.ShopRepository;
+import com.bdpick.shop.repository.ShopRepository;
+import com.bdpick.shop.service.impl.ShopService;
 import io.vertx.sqlclient.Tuple;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ import static com.bdpick.common.BdConstants.Exception.KEY_DUPLICATE_REGISTER;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ShopService {
+public class ShopServiceImpl implements ShopService {
 
     private final Stage.SessionFactory factory;
     private final ShopRepository shopRepository;

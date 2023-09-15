@@ -1,7 +1,7 @@
 package com.bdpick.domain.entity;
 
 import com.bdpick.domain.UserType;
-import com.bdpick.domain.entity.shop.Shop;
+import com.bdpick.shop.domain.Shop;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;

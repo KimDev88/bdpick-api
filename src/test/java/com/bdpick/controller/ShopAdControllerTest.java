@@ -4,7 +4,7 @@ import com.bdpick.config.TestConfiguration;
 import com.bdpick.domain.entity.Keyword;
 import com.bdpick.domain.entity.advertisement.AdKeyword;
 import com.bdpick.domain.entity.advertisement.ShopAd;
-import com.bdpick.domain.entity.shop.Shop;
+import com.bdpick.shop.domain.Shop;
 import com.bdpick.domain.request.CommonResponse;
 import com.bdpick.repository.AdImageRepository;
 import com.bdpick.repository.ShopAdRepository;

@@ -1,6 +1,7 @@
-package com.bdpick.repository;
+package com.bdpick.shop.repository.impl;
 
-import com.bdpick.domain.entity.shop.Shop;
+import com.bdpick.shop.domain.Shop;
+import com.bdpick.shop.repository.ShopRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.reactive.stage.Stage;
@@ -15,7 +16,7 @@ import java.util.concurrent.CompletionStage;
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class ShopRepository {
+public class ShopRepositoryImpl implements ShopRepository {
     private final Stage.SessionFactory factory;
 
     /**

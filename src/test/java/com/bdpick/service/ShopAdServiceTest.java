@@ -1,10 +1,11 @@
 package com.bdpick.service;
 
+import com.bdpick.domain.dto.Pageable;
 import com.bdpick.domain.entity.Keyword;
 import com.bdpick.domain.entity.advertisement.AdKeyword;
 import com.bdpick.domain.entity.advertisement.ShopAd;
-import com.bdpick.domain.entity.shop.Shop;
-import com.bdpick.domain.dto.Pageable;
+import com.bdpick.shop.domain.Shop;
+import com.bdpick.shop.service.impl.ShopService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.bdpick.domain.entity.shop;
+package com.bdpick.shop.domain;
 
 import com.bdpick.domain.ShopFileType;
 import com.bdpick.domain.entity.common.CreatedDate;
