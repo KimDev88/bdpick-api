@@ -1,8 +1,10 @@
 package com.bdpick.shop.web.rest;
 
 import com.bdpick.domain.request.CommonResponse;
+import com.bdpick.shop.adaptor.ShopProducer;
 import com.bdpick.shop.domain.Shop;
 import com.bdpick.shop.service.impl.ShopService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.codec.multipart.FilePart;
@@ -26,6 +28,7 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 @RequestMapping(value = PREFIX_API_URL + "/shops")
 public class ShopResource {
     private final ShopService shopService;
+    private final ShopProducer shopProducer;
 
     /**
      * select my shop
@@ -77,7 +80,18 @@ public class ShopResource {
         CommonResponse response = new CommonResponse();
 
         return shopService.createShop(headerMap, files, filesTypes, shop)
-                .map(CommonResponse::new)
+                .<CommonResponse>handle((item, sink) -> {
+                    try {
+                        Long shopId = item.getId();
+                        shopProducer.createdShop(shopId);
+                        // 이미지 테스트
+                        shopProducer.createdShopImages(shopId, item.getImageList());
+                    } catch (JsonProcessingException e) {
+                        sink.error(new RuntimeException(e));
+                        return;
+                    }
+                    sink.next(response.setData(item));
+                })
                 .onErrorResume(throwable -> {
                     log.error("throwable = ", throwable);
                     response.setError().setMessage(throwable.getMessage());

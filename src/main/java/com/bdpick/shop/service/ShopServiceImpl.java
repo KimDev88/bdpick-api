@@ -7,11 +7,13 @@ import com.bdpick.domain.ShopFileType;
 import com.bdpick.domain.entity.BdFile;
 import com.bdpick.domain.entity.User;
 import com.bdpick.domain.entity.common.Image;
+import com.bdpick.shop.adaptor.ShopProducer;
 import com.bdpick.shop.domain.Shop;
 import com.bdpick.shop.domain.ShopImage;
 import com.bdpick.domain.request.CommonResponse;
 import com.bdpick.shop.repository.ShopRepository;
 import com.bdpick.shop.service.impl.ShopService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.vertx.sqlclient.Tuple;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,8 @@ public class ShopServiceImpl implements ShopService {
     private final Stage.SessionFactory factory;
     private final ShopRepository shopRepository;
     private final JwtService jwtService;
+    private final ShopProducer shopProducer;
+
 
     private static final String MSG_EXIST_REGISTER_NUMBER = "이미 존재하는 사업자번호 입니다.";
 
@@ -183,7 +187,7 @@ public class ShopServiceImpl implements ShopService {
                                 .uri("status?serviceKey=" + openApiToken)
                                 .body(Mono.just(urlBodyMap), Map.class)
                                 .exchangeToMono(clientResponse -> clientResponse.bodyToMono(Map.class))
-                                .map(o -> {
+                                .<Mono<CommonResponse>>handle((o, sink) -> {
                                     Optional<Map<String, Object>> result = Optional.ofNullable(o);
                                     Optional<List<Map<String, Object>>> dataList = result.map(stringObjectMap -> (List<Map<String, Object>>) stringObjectMap.get("data"));
                                     Optional<Map<String, Object>> resultMap = dataList.stream().findAny().orElseGet(ArrayList::new).stream().findFirst();
@@ -193,14 +197,22 @@ public class ShopServiceImpl implements ShopService {
                                     } else {
                                         switch (bSttCd.get()) {
                                             // 계속사업자
-                                            case "01" -> response.setData(true);
+                                            case "01" -> {
+                                                response.setData(true);
+                                                try {
+                                                    shopProducer.verifyRegisterNumber(registerNumber);
+                                                } catch (JsonProcessingException e) {
+                                                    sink.error(new RuntimeException(e));
+                                                    return;
+                                                }
+                                            }
                                             // 휴업사업자
                                             case "02" -> response.setError("휴업 사업자 입니다.", false);
                                             // 폐업자
                                             case "03" -> response.setError("폐업 사업자 입니다.", false);
                                         }
                                     }
-                                    return Mono.just(response);
+                                    sink.next(Mono.just(response));
 //                                    return  response;
                                 }).block();
                     }

@@ -4,6 +4,7 @@ import com.bdpick.common.security.JwtService;
 import com.bdpick.config.TestConfiguration;
 import com.bdpick.domain.entity.User;
 import com.bdpick.domain.request.CommonResponse;
+import com.bdpick.shop.adaptor.ShopProducerImpl;
 import com.bdpick.shop.domain.Shop;
 import com.bdpick.shop.repository.impl.ShopRepositoryImpl;
 import com.bdpick.shop.service.ShopServiceImpl;
@@ -18,6 +19,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -41,6 +43,10 @@ public class ShopResourceTest {
     private ShopRepositoryImpl shopRepositoryImpl;
     @SpyBean
     private JwtService jwtService;
+    @SpyBean
+    private ShopProducerImpl shopProducer;
+    @SpyBean
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
     Map<String, Object> headerMap;
@@ -94,6 +100,7 @@ public class ShopResourceTest {
     @Test
     @WithMockUser
     public void createShopApiTest() {
+        // FIXME 테스트 필요
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("files", new ClassPathResource("/META-INF/persistence.xml"));
         builder.part("fileTypes", "S1");
@@ -122,6 +129,7 @@ public class ShopResourceTest {
     @Test
     @WithMockUser
     public void checkRegisterApiTest() {
+        // FIXME 테스트 필요
         webClient.post().uri(PREFIX_API_URL + "/shops/check-register")
                 .headers(headers)
                 .body(Mono.just(shop), Shop.class)
