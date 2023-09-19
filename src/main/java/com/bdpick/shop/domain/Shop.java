@@ -1,6 +1,6 @@
 package com.bdpick.shop.domain;
 
-import com.bdpick.domain.entity.User;
+import com.bdpick.user.domain.User;
 import com.bdpick.domain.entity.common.AuditDate;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -66,4 +66,29 @@ public class Shop extends AuditDate implements Serializable {
     private List<ShopImage> imageList = new ArrayList<>();
 //    @Transient
 //    private String addressFullName;
+
+    /**
+     * 매장 생성
+     *
+     * @param shopId 매장 아이디
+     * @return 매장
+     */
+    public static Shop createShop(Long shopId) {
+        Shop shop = new Shop();
+        shop.setId(shopId);
+        return shop;
+    }
+
+    /**
+     * 매장 이미지 변경
+     *
+     * @param imageList 변경할 이미지
+     * @return 매장
+     */
+    public Shop changeShopImages(List<ShopImage> imageList) {
+        this.imageList = imageList;
+        return this;
+    }
+
+
 }

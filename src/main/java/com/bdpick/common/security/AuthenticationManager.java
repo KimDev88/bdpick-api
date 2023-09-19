@@ -1,7 +1,7 @@
 package com.bdpick.common.security;
 
-import com.bdpick.repository.UserRepository;
-import com.bdpick.service.UserService;
+import com.bdpick.user.repository.impl.UserRepositoryImpl;
+import com.bdpick.user.service.impl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,10 +14,10 @@ import reactor.core.publisher.Mono;
 public class AuthenticationManager implements ReactiveAuthenticationManager {
 
     private final JwtService jwtService;
-    private final UserRepository userRepository;
-    private final UserService userService;
+    private final UserRepositoryImpl userRepository;
+    private final UserServiceImpl userService;
 
-//    public AuthenticationManager(JwtService jwtService, UserRepository userRepository) {
+//    public AuthenticationManager(JwtService jwtService, UserRepositoryImpl userRepository) {
 //        this.jwtService = jwtService;
 //        this.userRepository = userRepository;
 //    }

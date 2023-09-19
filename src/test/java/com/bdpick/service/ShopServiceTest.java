@@ -1,8 +1,8 @@
 package com.bdpick.service;
 
 import com.bdpick.common.security.JwtService;
-import com.bdpick.domain.entity.User;
-import com.bdpick.domain.entity.advertisement.ShopAd;
+import com.bdpick.user.domain.User;
+import com.bdpick.advertisement.domain.ShopAd;
 import com.bdpick.shop.domain.Shop;
 import com.bdpick.shop.service.impl.ShopService;
 import org.junit.jupiter.api.Assertions;

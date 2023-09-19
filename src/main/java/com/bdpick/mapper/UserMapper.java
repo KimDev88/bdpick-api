@@ -1,7 +1,7 @@
 package com.bdpick.mapper;
 
 import com.bdpick.domain.dto.UserDto;
-import com.bdpick.domain.entity.User;
+import com.bdpick.user.domain.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

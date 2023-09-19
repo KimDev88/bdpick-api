@@ -1,6 +1,6 @@
 package com.bdpick.shop.domain;
 
-import com.bdpick.domain.ShopFileType;
+import com.bdpick.shop.domain.enumeration.ShopFileType;
 import com.bdpick.domain.entity.common.CreatedDate;
 import com.bdpick.domain.entity.common.Image;
 import com.fasterxml.jackson.annotation.JsonBackReference;

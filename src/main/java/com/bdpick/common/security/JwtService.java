@@ -1,7 +1,7 @@
 package com.bdpick.common.security;
 
 import com.bdpick.common.BdUtil;
-import com.bdpick.domain.enums.TokenType;
+import com.bdpick.user.domain.enumeration.TokenType;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

@@ -1,14 +1,15 @@
 package com.bdpick.controller;
 
+import com.bdpick.advertisement.web.rest.ShopAdController;
 import com.bdpick.config.TestConfiguration;
 import com.bdpick.domain.entity.Keyword;
-import com.bdpick.domain.entity.advertisement.AdKeyword;
-import com.bdpick.domain.entity.advertisement.ShopAd;
+import com.bdpick.advertisement.domain.AdKeyword;
+import com.bdpick.advertisement.domain.ShopAd;
 import com.bdpick.shop.domain.Shop;
 import com.bdpick.domain.request.CommonResponse;
-import com.bdpick.repository.AdImageRepository;
-import com.bdpick.repository.ShopAdRepository;
-import com.bdpick.service.ShopAdService;
+import com.bdpick.advertisement.repository.impl.AdImageRepositoryImpl;
+import com.bdpick.advertisement.repository.impl.ShopAdRepositoryImpl;
+import com.bdpick.advertisement.service.ShopAdServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -40,11 +41,11 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 public class ShopAdControllerTest {
 
     @SpyBean
-    private ShopAdService shopAdService;
+    private ShopAdServiceImpl shopAdServiceImpl;
     @SpyBean
-    private ShopAdRepository shopAdRepository;
+    private ShopAdRepositoryImpl shopAdRepositoryImpl;
     @SpyBean
-    private AdImageRepository adImageRepository;
+    private AdImageRepositoryImpl adImageRepositoryImpl;
 
     Shop shop;
     ShopAd shopAd;

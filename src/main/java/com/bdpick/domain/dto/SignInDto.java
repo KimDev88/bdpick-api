@@ -1,6 +1,6 @@
 package com.bdpick.domain.dto;
 
-import com.bdpick.domain.UserType;
+import com.bdpick.user.domain.enumeration.UserType;
 import lombok.Data;
 
 /**

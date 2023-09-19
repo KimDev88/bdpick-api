@@ -7,14 +7,14 @@
         <provider>org.hibernate.reactive.provider.ReactivePersistenceProvider</provider>
         <class>com.bdpick.domain.entity.Keyword</class>
         <class>com.bdpick.domain.entity.BdFile</class>
-        <class>com.bdpick.domain.entity.User</class>
-        <class>com.bdpick.domain.entity.Verify</class>
-        <class>com.bdpick.domain.entity.Device</class>
+        <class>com.bdpick.user.domain.User</class>
+        <class>com.bdpick.user.domain.Verify</class>
+        <class>com.bdpick.user.domain.Device</class>
         <class>com.bdpick.shop.domain.Shop</class>
         <class>com.bdpick.shop.domain.ShopImage</class>
-        <class>com.bdpick.domain.entity.advertisement.AdImage</class>
-        <class>com.bdpick.domain.entity.advertisement.ShopAd</class>
-        <class>com.bdpick.domain.entity.advertisement.AdKeyword</class>
+        <class>com.bdpick.advertisement.domain.AdImage</class>
+        <class>com.bdpick.advertisement.domain.ShopAd</class>
+        <class>com.bdpick.advertisement.domain.AdKeyword</class>
         <properties>
 
             <!-- Naming strategy -->

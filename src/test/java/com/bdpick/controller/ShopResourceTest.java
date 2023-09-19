@@ -2,7 +2,7 @@ package com.bdpick.controller;
 
 import com.bdpick.common.security.JwtService;
 import com.bdpick.config.TestConfiguration;
-import com.bdpick.domain.entity.User;
+import com.bdpick.user.domain.User;
 import com.bdpick.domain.request.CommonResponse;
 import com.bdpick.shop.adaptor.ShopProducerImpl;
 import com.bdpick.shop.domain.Shop;

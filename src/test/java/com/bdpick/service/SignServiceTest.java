@@ -2,11 +2,13 @@ package com.bdpick.service;
 
 import com.bdpick.common.MailService;
 import com.bdpick.common.security.JwtService;
-import com.bdpick.domain.UserType;
+import com.bdpick.user.domain.enumeration.UserType;
 import com.bdpick.domain.dto.Token;
 import com.bdpick.domain.dto.UserDto;
-import com.bdpick.domain.entity.Device;
-import com.bdpick.domain.entity.Verify;
+import com.bdpick.user.domain.Device;
+import com.bdpick.user.domain.Verify;
+import com.bdpick.user.service.impl.DeviceServiceImpl;
+import com.bdpick.user.service.impl.SignServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +23,13 @@ import java.util.Objects;
 @SpringBootTest
 public class SignServiceTest {
     @Autowired
-    private SignService signService;
+    private SignServiceImpl signService;
     @Autowired
     private MailService mailService;
     @Autowired
     private JwtService jwtService;
     @Autowired
-    private DeviceService deviceService;
+    private DeviceServiceImpl deviceService;
 
     private UserDto user;
     private Verify verify;
