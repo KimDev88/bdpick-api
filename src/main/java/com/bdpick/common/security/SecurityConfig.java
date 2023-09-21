@@ -43,6 +43,7 @@ public class SecurityConfig {
                         }))
                 .authorizeExchange((exchanges) -> exchanges
                         .pathMatchers("/api/sign/**").permitAll()
+                        .pathMatchers("/kafka").permitAll()
                         .anyExchange().authenticated()
                 )
         ;

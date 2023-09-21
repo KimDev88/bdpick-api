@@ -1,6 +1,6 @@
 package com.bdpick.domain.dto;
 
-import com.bdpick.domain.entity.User;
+import com.bdpick.user.domain.User;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

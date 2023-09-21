@@ -3,19 +3,20 @@ package com.bdpick.controller;
 import com.bdpick.common.MailService;
 import com.bdpick.common.security.JwtService;
 import com.bdpick.config.TestConfiguration;
-import com.bdpick.domain.UserType;
+import com.bdpick.user.domain.enumeration.UserType;
 import com.bdpick.domain.dto.Token;
 import com.bdpick.domain.dto.UserDto;
-import com.bdpick.domain.entity.Device;
-import com.bdpick.domain.entity.User;
-import com.bdpick.domain.entity.Verify;
+import com.bdpick.user.domain.Device;
+import com.bdpick.user.domain.User;
+import com.bdpick.user.domain.Verify;
 import com.bdpick.domain.request.CommonResponse;
-import com.bdpick.repository.DeviceRepository;
-import com.bdpick.repository.SignRepository;
-import com.bdpick.repository.UserRepository;
-import com.bdpick.repository.VerifyRepository;
-import com.bdpick.service.DeviceService;
-import com.bdpick.service.SignService;
+import com.bdpick.user.repository.impl.DeviceRepositoryImpl;
+import com.bdpick.user.repository.impl.SignRepositoryImpl;
+import com.bdpick.user.repository.impl.UserRepositoryImpl;
+import com.bdpick.user.repository.impl.VerifyRepositoryImpl;
+import com.bdpick.user.service.impl.DeviceServiceImpl;
+import com.bdpick.user.service.impl.SignServiceImpl;
+import com.bdpick.user.web.rest.SignController;
 import org.hibernate.reactive.stage.Stage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,23 +42,23 @@ public class SignControllerTest {
     private Verify verify;
 
     @SpyBean
-    private SignService signService;
+    private SignServiceImpl signServiceImpl;
     @SpyBean
     private Stage.SessionFactory sessionFactory;
     @SpyBean
-    private SignRepository signRepository;
+    private SignRepositoryImpl signRepositoryImpl;
     @SpyBean
-    private UserRepository userRepository;
+    private UserRepositoryImpl userRepositoryImpl;
     @SpyBean
-    private VerifyRepository verifyRepository;
+    private VerifyRepositoryImpl verifyRepositoryImpl;
     @SpyBean
     private MailService mailService;
     @SpyBean
     private JwtService jwtService;
     @SpyBean
-    private DeviceService deviceService;
+    private DeviceServiceImpl deviceServiceImpl;
     @SpyBean
-    private DeviceRepository deviceRepository;
+    private DeviceRepositoryImpl deviceRepositoryImpl;
 
     private final String URI = PREFIX_API_URL + "/sign";
     private Device device;
@@ -130,7 +131,7 @@ public class SignControllerTest {
     @WithMockUser
     public void renewToken() {
         // 토큰 검증을 위해 실제 로그인 시 사용한 refresh token 조회
-        Device rtnDevice = deviceService.findDeviceByUserAndUuid(device).block();
+        Device rtnDevice = deviceServiceImpl.findDeviceByUserAndUuid(device).block();
         Token token = new Token(JwtService.createAccessToken(user.getId()), Objects.requireNonNull(rtnDevice).getRefreshToken());
         webClient.post()
                 .uri(URI + "/renew")

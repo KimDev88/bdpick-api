@@ -1,6 +1,6 @@
 package com.bdpick.common.security;
 
-import com.bdpick.domain.entity.User;
+import com.bdpick.user.domain.User;
 
 import java.io.Serializable;
 

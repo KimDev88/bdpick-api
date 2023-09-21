@@ -1,9 +1,10 @@
 package com.bdpick.controller;
 
 import com.bdpick.config.TestConfiguration;
-import com.bdpick.domain.entity.User;
+import com.bdpick.user.domain.User;
 import com.bdpick.domain.request.CommonResponse;
-import com.bdpick.service.UserService;
+import com.bdpick.user.service.impl.UserServiceImpl;
+import com.bdpick.user.web.rest.UserController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -30,7 +31,7 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 @ContextConfiguration
 public class UserControllerTest {
     @MockBean
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     private WebTestClient webClient;
     Consumer<HttpHeaders> headers;
@@ -40,7 +41,7 @@ public class UserControllerTest {
         webClient = TestConfiguration.getWebTestClient();
         headers = TestConfiguration.getCommonClientHeaders();
 
-        BDDMockito.given(userService.findById(ArgumentMatchers.anyString())).willReturn(Mono.just(new User()));
+        BDDMockito.given(userServiceImpl.findById(ArgumentMatchers.anyString())).willReturn(Mono.just(new User()));
     }
 
     @ParameterizedTest
