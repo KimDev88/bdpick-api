@@ -26,8 +26,10 @@ public class ShopProducerImpl implements ShopProducer {
 
     /**
      * 사업자 등록번호 검증
+     *
      * @param registerNumber 사업자 등록번호
      */
+    @Override
     public void verifyRegisterNumber(String registerNumber) throws JsonProcessingException {
         RegisterNumberVerified registerNumberVerified = new RegisterNumberVerified(registerNumber);
         String message = objectMapper.writeValueAsString(registerNumberVerified);

@@ -5,15 +5,18 @@ import com.bdpick.common.security.JwtService;
 import com.bdpick.domain.dto.SignInDto;
 import com.bdpick.domain.dto.Token;
 import com.bdpick.domain.dto.UserDto;
+import com.bdpick.user.adaptor.UserProducer;
 import com.bdpick.user.domain.Device;
 import com.bdpick.user.domain.User;
 import com.bdpick.user.domain.Verify;
 import com.bdpick.mapper.UserMapper;
+import com.bdpick.user.domain.enumeration.EmailType;
 import com.bdpick.user.repository.impl.DeviceRepositoryImpl;
 import com.bdpick.user.repository.impl.SignRepositoryImpl;
 import com.bdpick.user.repository.impl.UserRepositoryImpl;
 import com.bdpick.user.repository.impl.VerifyRepositoryImpl;
 import com.bdpick.user.service.SignService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +49,7 @@ public class SignServiceImpl implements SignService {
     private final MailService mailService;
     private final JwtService jwtService;
     private final DeviceRepositoryImpl deviceRepository;
+    private final UserProducer userProducer;
 
     /**
      * sign up
@@ -56,7 +60,15 @@ public class SignServiceImpl implements SignService {
     public Mono<User> up(@NonNull User user) {
         return factory.withTransaction(session
                         -> signRepository.up(user, session))
-                .thenApply(Mono::justOrEmpty)
+                .thenApply(createdUser -> {
+                    try {
+                        userProducer.createUser(createdUser.getId());
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return Mono.justOrEmpty(createdUser);
+
+                })
                 .exceptionally(Mono::error)
                 .toCompletableFuture().join();
     }
@@ -114,7 +126,14 @@ public class SignServiceImpl implements SignService {
                                                         foundDevice.setRefreshToken(refreshToken.get());
                                                     }
                                                     return deviceRepository.save(foundDevice, session)
-                                                            .thenCompose(unused -> CompletableFuture.completedStage(signInDto));
+                                                            .thenCompose(unused -> {
+                                                                try {
+                                                                    userProducer.logIn(userId);
+                                                                } catch (JsonProcessingException e) {
+                                                                    throw new RuntimeException(e);
+                                                                }
+                                                                return CompletableFuture.completedStage(signInDto);
+                                                            });
                                                 });
                                     }
                                 })
@@ -189,7 +208,16 @@ public class SignServiceImpl implements SignService {
                         -> session.find(User.class, id)
                 )
                 .thenApply(Objects::isNull)
-                .thenApply(Mono::just)
+                .thenApply(aBoolean -> {
+                    if (aBoolean) {
+                        try {
+                            userProducer.verifyId(id);
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    return Mono.just(aBoolean);
+                })
                 .exceptionally(Mono::error)
                 .toCompletableFuture().join();
     }
@@ -220,6 +248,8 @@ public class SignServiceImpl implements SignService {
      * @return true : success, false : fail
      */
     public Mono<Boolean> sendMail(@NonNull User user) {
+        // fixme userId 데이터 들어있는지 확인 필요
+        String userId = user.getId();
         String email = Optional.of(user.getEmail()).orElseThrow(NoSuchFieldError::new);
         String code = RandomStringUtils.randomAlphanumeric(6, 6);
         String subject = "BDPICK 인증번호";
@@ -237,6 +267,11 @@ public class SignServiceImpl implements SignService {
                         }))
                 .thenApply(unused -> {
                     mailService.sendMail(List.of(email), subject, code);
+                    try {
+                        userProducer.sendMail(user.getId(), email, EmailType.MAIL_VERIFIED);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
                     return Mono.just(true);
                 })
                 .exceptionally(Mono::error)
@@ -257,7 +292,17 @@ public class SignServiceImpl implements SignService {
                     return verifyRepository.findLastByEmailAndCode(verify, session);
                 })
                 // 생성된 데이터가 현재 시간 -3분보다 이후에 생성됐는지 확인
-                .thenApply(foundVerify -> Mono.just(foundVerify != null && foundVerify.getCreatedAt().isAfter(localDateTime)))
+                .thenApply(foundVerify -> {
+                    boolean isVerified = foundVerify != null && foundVerify.getCreatedAt().isAfter(localDateTime);
+                    if (isVerified) {
+                        try {
+                            userProducer.verifyMail(foundVerify.getEmail());
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    return Mono.just(isVerified);
+                })
                 .exceptionally(Mono::error)
                 .toCompletableFuture().join();
     }
