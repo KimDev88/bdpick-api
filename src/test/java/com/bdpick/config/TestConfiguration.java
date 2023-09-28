@@ -4,6 +4,7 @@ import com.bdpick.common.ApplicationContextProvider;
 import com.bdpick.common.BdUtil;
 import com.bdpick.common.EntityFactory;
 import com.bdpick.common.security.JwtService;
+import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
@@ -15,7 +16,7 @@ import java.util.function.Consumer;
  * test configration class
  */
 @org.springframework.boot.test.context.TestConfiguration
-@Import({ApplicationContextProvider.class, EntityFactory.class, JwtService.class})
+@Import({ApplicationContextProvider.class, EntityFactory.class, JwtService.class, KafkaAutoConfiguration.class})
 public class TestConfiguration {
     private static final String userIdForToken = "su2407";
 

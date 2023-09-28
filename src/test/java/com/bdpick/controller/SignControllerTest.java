@@ -3,13 +3,14 @@ package com.bdpick.controller;
 import com.bdpick.common.MailService;
 import com.bdpick.common.security.JwtService;
 import com.bdpick.config.TestConfiguration;
-import com.bdpick.user.domain.enumeration.UserType;
 import com.bdpick.domain.dto.Token;
 import com.bdpick.domain.dto.UserDto;
+import com.bdpick.domain.request.CommonResponse;
+import com.bdpick.user.adaptor.UserProducerImpl;
 import com.bdpick.user.domain.Device;
 import com.bdpick.user.domain.User;
 import com.bdpick.user.domain.Verify;
-import com.bdpick.domain.request.CommonResponse;
+import com.bdpick.user.domain.enumeration.UserType;
 import com.bdpick.user.repository.impl.DeviceRepositoryImpl;
 import com.bdpick.user.repository.impl.SignRepositoryImpl;
 import com.bdpick.user.repository.impl.UserRepositoryImpl;
@@ -35,8 +36,9 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 /**
  * sign controller test
  */
-@WebFluxTest(SignController.class)
+@WebFluxTest({SignController.class})
 @Import(TestConfiguration.class)
+//@EmbeddedKafka(brokerProperties = {"listener=PLAINTEXT://localhost:9092"})
 public class SignControllerTest {
     private UserDto user;
     private Verify verify;
@@ -59,6 +61,9 @@ public class SignControllerTest {
     private DeviceServiceImpl deviceServiceImpl;
     @SpyBean
     private DeviceRepositoryImpl deviceRepositoryImpl;
+    @SpyBean
+    private UserProducerImpl userProducer;
+
 
     private final String URI = PREFIX_API_URL + "/sign";
     private Device device;

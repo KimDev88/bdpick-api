@@ -57,12 +57,15 @@ dependencies {
     implementation 'io.vertx:vertx-mysql-client:4.4.5'
 //    implementation 'cz.encircled:joiner-reactive:0.4.7'
 
+    // kafka
     implementation 'org.springframework.kafka:spring-kafka:3.0.11'
 
     // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
     testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.kafka:spring-kafka-test:3.0.11'
+
 
 
 }
