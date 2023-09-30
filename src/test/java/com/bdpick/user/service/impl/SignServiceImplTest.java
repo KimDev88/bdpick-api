@@ -1,14 +1,14 @@
-package com.bdpick.service;
+package com.bdpick.user.service.impl;
 
 import com.bdpick.common.MailService;
 import com.bdpick.common.security.JwtService;
+import com.bdpick.mapper.UserMapper;
+import com.bdpick.user.domain.User;
 import com.bdpick.user.domain.enumeration.UserType;
 import com.bdpick.domain.dto.Token;
 import com.bdpick.domain.dto.UserDto;
 import com.bdpick.user.domain.Device;
 import com.bdpick.user.domain.Verify;
-import com.bdpick.user.service.impl.DeviceServiceImpl;
-import com.bdpick.user.service.impl.SignServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ import java.util.Objects;
  * sign service test class
  */
 @SpringBootTest
-public class SignServiceTest {
+public class SignServiceImplTest {
     @Autowired
     private SignServiceImpl signService;
     @Autowired
@@ -63,7 +63,8 @@ public class SignServiceTest {
      */
     @Test
     public void up() {
-        StepVerifier.create(signService.up(user))
+        User param = UserMapper.INSTANCE.DtoToUser(user);
+        StepVerifier.create(signService.up(param))
                 .expectNextMatches(user1 -> user1 != null && user1.getId() != null)
                 .verifyComplete();
 

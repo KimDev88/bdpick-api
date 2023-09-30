@@ -1,6 +1,5 @@
-package com.bdpick.service;
+package com.bdpick.user.service.impl;
 
-import com.bdpick.user.service.impl.UserServiceImpl;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,7 @@ import reactor.test.StepVerifier;
  * user service test class
  */
 @SpringBootTest
-public class UserServiceTest {
+public class UserServiceImplTest {
     @Autowired
     private UserServiceImpl userService;
 

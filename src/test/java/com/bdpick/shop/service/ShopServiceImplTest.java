@@ -1,4 +1,4 @@
-package com.bdpick.service;
+package com.bdpick.shop.service;
 
 import com.bdpick.common.security.JwtService;
 import com.bdpick.user.domain.User;
@@ -26,10 +26,10 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 /**
- * shop service test class
+ * shop service impl test class
  */
 @SpringBootTest
-public class ShopServiceTest {
+public class ShopServiceImplTest {
     @Autowired
     private ShopService shopService;
 
@@ -122,7 +122,6 @@ public class ShopServiceTest {
      */
     @Test
     public void createShopTest() {
-//        Map<String, Object> headerMap = new HashMap<>();
         StepVerifier.create(shopService.createShop(headerMap, partFlux, fileTypeFlux, shop))
                 .expectNextMatches(createdShop -> (
                         createdShop.getId() != null &&

@@ -1,14 +1,14 @@
-package com.bdpick.controller;
+package com.bdpick.shop.web.rest;
 
 import com.bdpick.common.security.JwtService;
 import com.bdpick.config.TestConfiguration;
-import com.bdpick.user.domain.User;
 import com.bdpick.domain.request.CommonResponse;
 import com.bdpick.shop.adaptor.ShopProducerImpl;
 import com.bdpick.shop.domain.Shop;
 import com.bdpick.shop.repository.impl.ShopRepositoryImpl;
 import com.bdpick.shop.service.ShopServiceImpl;
-import com.bdpick.shop.web.rest.ShopResource;
+import com.bdpick.user.domain.User;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -32,11 +31,11 @@ import java.util.function.Consumer;
 import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 
 /**
- * shop ad controller test class
+ * Shop Resource Test Class
  */
 @WebFluxTest(ShopResource.class)
 @Import(TestConfiguration.class)
-public class ShopResourceTest {
+class ShopResourceTest {
     @SpyBean
     private ShopServiceImpl shopService;
     @SpyBean
@@ -45,19 +44,19 @@ public class ShopResourceTest {
     private JwtService jwtService;
     @SpyBean
     private ShopProducerImpl shopProducer;
-    @SpyBean
-    private KafkaTemplate<String, String> kafkaTemplate;
+//    @SpyBean
+//    private KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
     Map<String, Object> headerMap;
 
     private WebTestClient webClient;
-    Consumer<HttpHeaders> headers;
+    private Consumer<HttpHeaders> headers;
+    private Shop shop;
 
-    Shop shop;
 
     @BeforeEach
-    public void stub() {
+    void setUp() {
         webClient = TestConfiguration.getWebTestClient();
         headers = TestConfiguration.getCommonClientHeaders();
 
@@ -75,12 +74,16 @@ public class ShopResourceTest {
         shop.setRegisterNumber("1141679791");
     }
 
+    @AfterEach
+    void tearDown() {
+    }
+
     /**
      * select my shop info
      */
     @Test
     @WithMockUser
-    public void selectMyShopApiTest() {
+    void selectMyShop() {
         webClient.get().uri(PREFIX_API_URL + "/shops/this")
                 .headers(headers)
                 .exchange()
@@ -91,7 +94,25 @@ public class ShopResourceTest {
                     });
                 })
                 .expectStatus().isOk();
+    }
 
+    /**
+     * check register number is available
+     */
+    @Test
+    @WithMockUser
+    void checkRegisterNumber() {
+        webClient.post().uri(PREFIX_API_URL + "/shops/check-register")
+                .headers(headers)
+                .body(Mono.just(shop), Shop.class)
+                .exchange()
+                .expectAll(responseSpec -> {
+                    responseSpec.expectStatus().isOk();
+                    responseSpec.expectBody(CommonResponse.class).consumeWith(commonResponseEntityExchangeResult -> {
+                        assert Objects.requireNonNull(commonResponseEntityExchangeResult.getResponseBody()).getData() != null;
+                    });
+                })
+                .expectStatus().isOk();
     }
 
     /**
@@ -99,8 +120,7 @@ public class ShopResourceTest {
      */
     @Test
     @WithMockUser
-    public void createShopApiTest() {
-        // FIXME 테스트 필요
+    void createShop() {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("files", new ClassPathResource("/META-INF/persistence.xml"));
         builder.part("fileTypes", "S1");
@@ -122,25 +142,4 @@ public class ShopResourceTest {
                 })
                 .expectStatus().isOk();
     }
-
-    /**
-     * check register number is available
-     */
-    @Test
-    @WithMockUser
-    public void checkRegisterApiTest() {
-        // FIXME 테스트 필요
-        webClient.post().uri(PREFIX_API_URL + "/shops/check-register")
-                .headers(headers)
-                .body(Mono.just(shop), Shop.class)
-                .exchange()
-                .expectAll(responseSpec -> {
-                    responseSpec.expectStatus().isOk();
-                    responseSpec.expectBody(CommonResponse.class).consumeWith(commonResponseEntityExchangeResult -> {
-                        assert Objects.requireNonNull(commonResponseEntityExchangeResult.getResponseBody()).getData() != null;
-                    });
-                })
-                .expectStatus().isOk();
-    }
-
 }

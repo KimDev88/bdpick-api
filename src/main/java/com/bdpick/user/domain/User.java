@@ -3,8 +3,11 @@ package com.bdpick.user.domain;
 import com.bdpick.user.domain.enumeration.UserType;
 import com.bdpick.shop.domain.Shop;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -20,7 +23,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(name = "UNQ_EMAIL", columnNames = {"email"}))
-//public class User extends AuditDate implements Serializable, UserDetails {
+@JsonIdentityInfo(property = "id", generator = ObjectIdGenerators.PropertyGenerator.class)
 public class User implements Serializable, UserDetails {
     @Id
     @Column(length = 100)
@@ -48,8 +51,8 @@ public class User implements Serializable, UserDetails {
     @Comment("수정일")
     private LocalDateTime updatedAt;
 
-    @JsonBackReference
     @OneToOne(mappedBy = "user")
+    @ToString.Exclude
     private Shop shop;
 
     @Transient

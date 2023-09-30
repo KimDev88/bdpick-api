@@ -1,13 +1,12 @@
 package com.bdpick.shop.domain;
 
-import com.bdpick.user.domain.User;
 import com.bdpick.domain.entity.common.AuditDate;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.bdpick.user.domain.User;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -24,12 +23,12 @@ import java.util.List;
                 @UniqueConstraint(name = "UNQ_SHOP_REGISTER_NUMBER", columnNames = {"registerNumber"})
         }
 )
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @EqualsAndHashCode(callSuper = true)
 public class Shop extends AuditDate implements Serializable {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "FK_SHOP_USER_ID"))
-    @ToString.Exclude
-    @JsonManagedReference
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
     @Column(nullable = false, length = 10, columnDefinition = "CHAR(10)")
@@ -59,11 +58,10 @@ public class Shop extends AuditDate implements Serializable {
     @Comment("상세주소명")
     private String addressName;
 
-    @ToString.Exclude
     @OneToMany(mappedBy = "shop", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonBackReference
     private List<ShopImage> imageList = new ArrayList<>();
+
 //    @Transient
 //    private String addressFullName;
 

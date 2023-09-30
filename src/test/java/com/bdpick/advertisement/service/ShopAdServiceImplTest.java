@@ -1,6 +1,5 @@
-package com.bdpick.service;
+package com.bdpick.advertisement.service;
 
-import com.bdpick.advertisement.service.ShopAdServiceImpl;
 import com.bdpick.domain.dto.Pageable;
 import com.bdpick.domain.entity.Keyword;
 import com.bdpick.advertisement.domain.AdKeyword;
@@ -38,7 +37,7 @@ import java.util.stream.Stream;
  * shop ad service test class
  */
 @SpringBootTest
-public class ShopAdServiceTest {
+public class ShopAdServiceImplTest {
     @Autowired
     private ShopAdServiceImpl shopAdService;
     @Autowired
@@ -56,15 +55,6 @@ public class ShopAdServiceTest {
     public void setData() {
         // 가장 마지막에 등록된 shop 조회
         shop = shopService.selectShopIsLastCreated().block();
-
-
-//        shop.setName("테스트 매장");
-//        shop.setTel("01025562407");
-//        shop.setAddressName("호계1동");
-//        shop.setOwnerName("김용수");
-//        shop.setRegistNumber("3788600265");
-//        shop.setUserId("su240");
-//        shopRepository.save(shop).subscribe();
 
         shopAd.setShop(shop);
         shopAd.setBranchName("지점명");

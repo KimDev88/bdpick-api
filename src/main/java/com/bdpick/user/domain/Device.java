@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.io.Serializable;
 
@@ -13,9 +15,11 @@ import java.io.Serializable;
  */
 @Entity
 @Data
+@Table(uniqueConstraints = @UniqueConstraint(name = "UNQ_DEVICE_USER_ID", columnNames = {"user_id"}))
 @EqualsAndHashCode(callSuper = true)
 public class Device extends AuditDate implements Serializable {
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(foreignKey = @ForeignKey(name = "FK_DEVICE_USER_ID"), nullable = false)
     private User user;
 

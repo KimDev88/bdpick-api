@@ -96,7 +96,14 @@ public class ShopAdRepositoryImpl implements ShopAdRepository {
      * @return shop ad list
      */
     public CompletionStage<List<ShopAd>> findShopAds(Pageable pageable, @NonNull Stage.Session session) {
-        return session.createQuery("select ad from ShopAd ad join Shop s on ad.shop = s order by ad.id asc", ShopAd.class)
+        String sql = """
+                select ad from ShopAd ad
+                        left join fetch ad.keywordList
+                        left join fetch ad.adImageList
+                        order by ad.id asc
+                """;
+        return session.createQuery(sql, ShopAd.class)
+//        return session.createQuery("select ad from Shop s inner join fetch from ShopAd ad join  on ad.shop = s order by ad.id asc", ShopAd.class)
                 .setFirstResult(pageable.getOffset())
                 .setMaxResults(pageable.getSize())
                 .getResultList();

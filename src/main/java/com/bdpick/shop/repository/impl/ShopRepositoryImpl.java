@@ -90,9 +90,14 @@ public class ShopRepositoryImpl implements ShopRepository {
      * @return shop
      */
     public CompletionStage<Shop> findShopIsLastCreated(Stage.Session session) {
-        return session.createQuery("select s from Shop s order by createdAt desc", Shop.class)
+        return session.createQuery("select s from Shop s order by s.createdAt desc", Shop.class)
                 .setMaxResults(1)
                 .getSingleResultOrNull()
-                .thenApply(shop -> shop);
+                .thenCompose(shop ->
+                        Stage.fetch(shop.getImageList())
+                                .thenApply(imageList -> {
+                                    shop.setImageList(imageList);
+                                    return shop;
+                                }));
     }
 }
