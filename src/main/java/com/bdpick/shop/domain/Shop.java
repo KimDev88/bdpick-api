@@ -1,6 +1,6 @@
 package com.bdpick.shop.domain;
 
-import com.bdpick.domain.entity.common.AuditDate;
+import com.bdpick.common.domain.AuditDate;
 import com.bdpick.user.domain.User;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;

@@ -50,13 +50,12 @@ public interface UserProducer {
      * @param email  email
      * @param type   email type
      */
-    void sendMail(String userId, String email, EmailType type) throws JsonProcessingException;
+    void sendMail(String userId, String email, EmailType type, String subject, String text) throws JsonProcessingException;
 
     /**
      * verify email
      *
-     * @param userId userId
-     * @param email  email
+     * @param email email
      */
     void verifyMail(String email) throws JsonProcessingException;
 

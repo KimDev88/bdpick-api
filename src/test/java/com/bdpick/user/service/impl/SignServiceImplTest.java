@@ -1,12 +1,12 @@
 package com.bdpick.user.service.impl;
 
-import com.bdpick.common.MailService;
+import com.bdpick.mail.service.impl.MailServiceImpl;
 import com.bdpick.common.security.JwtService;
-import com.bdpick.mapper.UserMapper;
+import com.bdpick.user.web.rest.mapper.UserMapper;
 import com.bdpick.user.domain.User;
 import com.bdpick.user.domain.enumeration.UserType;
-import com.bdpick.domain.dto.Token;
-import com.bdpick.domain.dto.UserDto;
+import com.bdpick.user.web.rest.dto.Token;
+import com.bdpick.user.web.rest.dto.UserDto;
 import com.bdpick.user.domain.Device;
 import com.bdpick.user.domain.Verify;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +25,7 @@ public class SignServiceImplTest {
     @Autowired
     private SignServiceImpl signService;
     @Autowired
-    private MailService mailService;
+    private MailServiceImpl mailServiceImpl;
     @Autowired
     private JwtService jwtService;
     @Autowired

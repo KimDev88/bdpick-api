@@ -1,6 +1,6 @@
 package com.bdpick.common.security;
 
-import com.bdpick.domain.request.CommonResponse;
+import com.bdpick.common.request.CommonResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import static com.bdpick.domain.request.ResponseCode.CODE_TOKEN_EXPIRED;
+import static com.bdpick.common.request.ResponseCode.CODE_TOKEN_EXPIRED;
 
 /**
  * 토큰 만료 시 custom response handling class

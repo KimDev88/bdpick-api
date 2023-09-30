@@ -1,7 +1,7 @@
 package com.bdpick.advertisement.repository.impl;
 
 import com.bdpick.advertisement.repository.KeywordRepository;
-import com.bdpick.domain.entity.Keyword;
+import com.bdpick.advertisement.domain.Keyword;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.reactive.stage.Stage;
 import org.springframework.stereotype.Repository;

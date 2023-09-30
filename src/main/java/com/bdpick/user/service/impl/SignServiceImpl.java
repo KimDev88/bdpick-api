@@ -1,15 +1,15 @@
 package com.bdpick.user.service.impl;
 
-import com.bdpick.common.MailService;
+import com.bdpick.mail.service.impl.MailServiceImpl;
 import com.bdpick.common.security.JwtService;
-import com.bdpick.domain.dto.SignInDto;
-import com.bdpick.domain.dto.Token;
-import com.bdpick.domain.dto.UserDto;
+import com.bdpick.user.web.rest.dto.SignInDto;
+import com.bdpick.user.web.rest.dto.Token;
+import com.bdpick.user.web.rest.dto.UserDto;
 import com.bdpick.user.adaptor.UserProducer;
 import com.bdpick.user.domain.Device;
 import com.bdpick.user.domain.User;
 import com.bdpick.user.domain.Verify;
-import com.bdpick.mapper.UserMapper;
+import com.bdpick.user.web.rest.mapper.UserMapper;
 import com.bdpick.user.domain.enumeration.EmailType;
 import com.bdpick.user.repository.impl.DeviceRepositoryImpl;
 import com.bdpick.user.repository.impl.SignRepositoryImpl;
@@ -46,7 +46,7 @@ public class SignServiceImpl implements SignService {
     private final SignRepositoryImpl signRepository;
     private final UserRepositoryImpl userRepository;
     private final VerifyRepositoryImpl verifyRepository;
-    private final MailService mailService;
+    private final MailServiceImpl mailServiceImpl;
     private final JwtService jwtService;
     private final DeviceRepositoryImpl deviceRepository;
     private final UserProducer userProducer;
@@ -251,25 +251,24 @@ public class SignServiceImpl implements SignService {
     public Mono<Boolean> sendMail(@NonNull User user) {
         // fixme userId 데이터 들어있는지 확인 필요
         String userId = user.getId();
-        String email = Optional.of(user.getEmail()).orElseThrow(NoSuchFieldError::new);
+        String email = Optional.of(user.getEmail()).orElseThrow(NoSuchFieldError::new).trim();
         String code = RandomStringUtils.randomAlphanumeric(6, 6);
         String subject = "BDPICK 인증번호";
 
         return factory.withTransaction(session
                         -> userRepository.findByEmail(email, session)
                         .thenAccept((foundUser) -> {
-                            if (foundUser == null) {
-                                throw new RuntimeException(KEY_NO_USER);
-                            }
+//                            if (foundUser == null) {
+//                                throw new RuntimeException(KEY_NO_USER);
+//                            }
                             Verify verify = new Verify();
                             verify.setCode(code);
                             verify.setEmail(email);
                             session.persist(verify);
                         }))
                 .thenApply(unused -> {
-                    mailService.sendMail(List.of(email), subject, code);
                     try {
-                        userProducer.sendMail(user.getId(), email, EmailType.MAIL_VERIFIED);
+                        userProducer.sendMail(user.getId(), email, EmailType.MAIL_VERIFIED, subject, code);
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
@@ -288,6 +287,7 @@ public class SignServiceImpl implements SignService {
      */
     public Mono<Boolean> verifyEmail(@NonNull Verify verify) {
         LocalDateTime localDateTime = LocalDateTime.now().minusMinutes(3);
+        verify.setEmail(verify.getEmail().trim());
         return factory.withSession(session -> {
                     // 해당 이메일과 코드로 가장 최근 데이터 1건 조회
                     return verifyRepository.findLastByEmailAndCode(verify, session);

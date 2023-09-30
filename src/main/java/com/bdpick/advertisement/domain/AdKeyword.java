@@ -1,7 +1,6 @@
 package com.bdpick.advertisement.domain;
 
-import com.bdpick.domain.entity.Keyword;
-import com.bdpick.domain.entity.common.CreatedDate;
+import com.bdpick.common.domain.CreatedDate;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;

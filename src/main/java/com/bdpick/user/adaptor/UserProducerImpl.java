@@ -1,5 +1,6 @@
 package com.bdpick.user.adaptor;
 
+import com.bdpick.mail.adaptor.MailConsumer;
 import com.bdpick.user.domain.enumeration.EmailType;
 import com.bdpick.user.domain.event.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -98,10 +99,11 @@ public class UserProducerImpl implements UserProducer {
      * @param type   email type
      */
     @Override
-    public void sendMail(String userId, String email, EmailType type) throws JsonProcessingException {
-        MailSent mailSent = new MailSent(userId, email, type);
+    public void sendMail(String userId, String email, EmailType type, String subject, String text) throws JsonProcessingException{
+        MailSent mailSent = new MailSent(userId, email, type, subject, text);
         String message = objectMapper.writeValueAsString(mailSent);
-        kafkaTemplate.send(TOPIC_SEND_MAIL, message);
+        kafkaTemplate.send(MailConsumer.TOPIC_MAIL, message);
+//        kafkaTemplate.send(TOPIC_SEND_MAIL, message);
     }
 
     /**

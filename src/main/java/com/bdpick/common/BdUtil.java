@@ -1,8 +1,8 @@
 package com.bdpick.common;
 
-import com.bdpick.domain.dto.BdFileDto;
-import com.bdpick.domain.entity.BdFile;
-import com.bdpick.mapper.BdFileMapper;
+import com.bdpick.common.web.rest.dto.BdFileDto;
+import com.bdpick.common.domain.BdFile;
+import com.bdpick.common.web.rest.mapper.BdFileMapper;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;

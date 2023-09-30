@@ -1,6 +1,6 @@
 package com.bdpick.user.domain;
 
-import com.bdpick.domain.entity.common.AuditDate;
+import com.bdpick.common.domain.AuditDate;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

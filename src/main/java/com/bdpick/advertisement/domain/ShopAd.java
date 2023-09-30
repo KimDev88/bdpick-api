@@ -1,6 +1,6 @@
 package com.bdpick.advertisement.domain;
 
-import com.bdpick.domain.entity.common.AuditDate;
+import com.bdpick.common.domain.AuditDate;
 import com.bdpick.shop.domain.Shop;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;

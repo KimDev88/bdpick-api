@@ -1,6 +1,6 @@
 package com.bdpick.shop.web.rest;
 
-import com.bdpick.domain.request.CommonResponse;
+import com.bdpick.common.request.CommonResponse;
 import com.bdpick.shop.adaptor.ShopProducer;
 import com.bdpick.shop.domain.Shop;
 import com.bdpick.shop.service.impl.ShopService;

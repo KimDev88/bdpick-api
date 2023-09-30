@@ -1,7 +1,7 @@
 package com.bdpick.advertisement.service;
 
-import com.bdpick.domain.dto.Pageable;
-import com.bdpick.domain.entity.Keyword;
+import com.bdpick.common.web.rest.dto.Pageable;
+import com.bdpick.advertisement.domain.Keyword;
 import com.bdpick.advertisement.domain.AdKeyword;
 import com.bdpick.advertisement.domain.ShopAd;
 import com.bdpick.shop.domain.Shop;

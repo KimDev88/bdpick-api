@@ -1,6 +1,6 @@
 package com.bdpick.shop.service.impl;
 
-import com.bdpick.domain.request.CommonResponse;
+import com.bdpick.common.request.CommonResponse;
 import com.bdpick.shop.domain.Shop;
 import org.springframework.http.codec.multipart.FilePart;
 import reactor.core.publisher.Flux;

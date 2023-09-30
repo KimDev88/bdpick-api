@@ -2,7 +2,7 @@ package com.bdpick.shop.web.rest;
 
 import com.bdpick.common.security.JwtService;
 import com.bdpick.config.TestConfiguration;
-import com.bdpick.domain.request.CommonResponse;
+import com.bdpick.common.request.CommonResponse;
 import com.bdpick.shop.adaptor.ShopProducerImpl;
 import com.bdpick.shop.domain.Shop;
 import com.bdpick.shop.repository.impl.ShopRepositoryImpl;

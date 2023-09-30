@@ -1,6 +1,6 @@
 package com.bdpick.user.domain;
 
-import com.bdpick.domain.entity.common.CreatedDate;
+import com.bdpick.common.domain.CreatedDate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import lombok.Data;

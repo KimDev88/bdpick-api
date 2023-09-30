@@ -5,8 +5,8 @@
 
     <persistence-unit name="mariadb">
         <provider>org.hibernate.reactive.provider.ReactivePersistenceProvider</provider>
-        <class>com.bdpick.domain.entity.Keyword</class>
-        <class>com.bdpick.domain.entity.BdFile</class>
+        <class>com.bdpick.advertisement.domain.Keyword</class>
+        <class>com.bdpick.common.domain.BdFile</class>
         <class>com.bdpick.user.domain.User</class>
         <class>com.bdpick.user.domain.Verify</class>
         <class>com.bdpick.user.domain.Device</class>
