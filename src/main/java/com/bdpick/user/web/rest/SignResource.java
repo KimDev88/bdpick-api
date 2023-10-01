@@ -25,14 +25,6 @@ import static com.bdpick.common.BdConstants.PREFIX_API_URL;
 @RequestMapping(PREFIX_API_URL + "/sign")
 public class SignResource {
     private final SignServiceImpl signService;
-    private static final String MSG_NOT_EXIST_EMAIL = "해당 이메일이 존재하지않습니다.";
-
-//
-//    private Mono<Boolean> findEmailExist(String email) {
-//        return userRepository.findByEmail(email)
-//                .hasElement();
-//    }
-
 
     /**
      * sing up user
@@ -52,7 +44,7 @@ public class SignResource {
                         return Mono.just(commonResponse
                                 .setData(false)
                                 .setCode(ResponseCode.CODE_DATA_DUPLICATE)
-                                .setMessage(ResponseCode.MESSAGE_DATA_DUPLICATE));
+                                .setMessage(MSG_DATA_DUPLICATE));
                     }
                     return Mono.just(commonResponse.setError().setData(false).setMessage(throwable.getMessage()));
                 });
@@ -121,11 +113,11 @@ public class SignResource {
                 .map(aBoolean -> response.setData(true))
                 .onErrorResume(throwable -> {
                             log.error("error : ", throwable);
-                            // 해당 이메일의 회원이 존재하지 않을 경우
+                            // 해당 이메일 회원이 이미 존재할 경우
                             if (throwable instanceof RuntimeException
                                     && throwable.getCause() != null
-                                    && throwable.getCause().getMessage().equals(BdConstants.Exception.KEY_NO_USER)) {
-                                return Mono.just(response.setError(MSG_NOT_EXIST_EMAIL, false));
+                                    && throwable.getCause().getMessage().equals(BdConstants.Exception.KEY_EMAIL_EXIST)) {
+                                return Mono.just(response.setError(MSG_EMAIL_EXIST, false));
                             }
                             return Mono.just(response.setError().setMessage(throwable.getMessage()).setData(false));
                         }

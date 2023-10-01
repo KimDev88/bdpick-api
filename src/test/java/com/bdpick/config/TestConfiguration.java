@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 @org.springframework.boot.test.context.TestConfiguration
 @Import({ApplicationContextProvider.class, EntityFactory.class, JwtService.class, KafkaAutoConfiguration.class})
 public class TestConfiguration {
-    private static final String userIdForToken = "su2407";
+    private static final String userIdForToken = "su2408";
 
     // 컨트롤러에서 공통으로 사용할 webTestClient 설정
     public static WebTestClient getWebTestClient() {

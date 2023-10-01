@@ -249,8 +249,6 @@ public class SignServiceImpl implements SignService {
      * @return true : success, false : fail
      */
     public Mono<Boolean> sendMail(@NonNull User user) {
-        // fixme userId 데이터 들어있는지 확인 필요
-        String userId = user.getId();
         String email = Optional.of(user.getEmail()).orElseThrow(NoSuchFieldError::new).trim();
         String code = RandomStringUtils.randomAlphanumeric(6, 6);
         String subject = "BDPICK 인증번호";
@@ -258,9 +256,10 @@ public class SignServiceImpl implements SignService {
         return factory.withTransaction(session
                         -> userRepository.findByEmail(email, session)
                         .thenAccept((foundUser) -> {
-//                            if (foundUser == null) {
-//                                throw new RuntimeException(KEY_NO_USER);
-//                            }
+                            // 해당 이메일이 사용중일 경우
+                            if (foundUser != null) {
+                                throw new RuntimeException(KEY_EMAIL_EXIST);
+                            }
                             Verify verify = new Verify();
                             verify.setCode(code);
                             verify.setEmail(email);

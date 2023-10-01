@@ -57,12 +57,12 @@ public class ShopServiceImpl implements ShopService {
     public Mono<Shop> selectMyShop(@NonNull Map<String, Object> headerMap) {
         try {
             String token = BdUtil.getTokenByHeader(headerMap);
-            String userId = jwtService.getUserIdByToken(token);
+            String userId = JwtService.getUserIdByToken(token);
             return factory.withSession(session ->
                             shopRepository.findShopByUserId(userId, session))
                     .thenApply(shop -> {
-                        log.info(shop.toString());
-                        return Mono.just(shop);
+                        log.info(String.valueOf(shop));
+                        return Mono.justOrEmpty(shop);
                     })
                     .exceptionally(Mono::error)
                     .toCompletableFuture().join();
@@ -102,7 +102,7 @@ public class ShopServiceImpl implements ShopService {
         List<ShopImage> imageList = new ArrayList<>();
         try {
             // token 에서 회원정보 추출
-            String userId = jwtService.getUserIdByHeaderMap(headerMap);
+            String userId = JwtService.getUserIdByHeaderMap(headerMap);
             User user = new User();
             user.setId(userId);
             shop.setUser(user);
@@ -157,7 +157,7 @@ public class ShopServiceImpl implements ShopService {
     public Mono<CommonResponse> checkRegisterNumber(@NonNull Shop shop) {
         CommonResponse response = new CommonResponse();
 
-        String registerNumber = shop.getRegisterNumber();
+        String registerNumber = shop.getRegisterNumber().trim();
         // request parameter 설정
         Map<String, Object> urlBodyMap = new HashMap<>();
         List<String> bnoList = new ArrayList<>();
@@ -236,6 +236,10 @@ public class ShopServiceImpl implements ShopService {
                         })
                 )
                 .toCompletableFuture().join();
+    }
+
+    public Long getShopIdByHeaderMap(Map<String, Object> headerMap) throws Exception {
+        return getShopIdByUserId(JwtService.getUserIdByHeaderMap(headerMap));
     }
 
 

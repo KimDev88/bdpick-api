@@ -21,7 +21,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ShopAd extends AuditDate implements Serializable {
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(nullable = false, foreignKey = @ForeignKey(name = "FK_SHOP_AD_SHOP_ID"))
     @Comment("가게 아이디")
@@ -43,7 +43,7 @@ public class ShopAd extends AuditDate implements Serializable {
     @Comment("홍보 내용")
     private String content;
 
-    @OneToMany(mappedBy = "shopAd", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "shopAd", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Comment("키워드 목록")
     @JsonManagedReference
     private List<AdKeyword> keywordList;

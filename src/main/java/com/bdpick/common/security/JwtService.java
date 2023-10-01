@@ -5,6 +5,7 @@ import com.bdpick.user.domain.enumeration.TokenType;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class JwtService {
     private static Key secretKey;
@@ -80,7 +82,7 @@ public class JwtService {
      * @param token jwt token
      * @return jws
      */
-    public Jws<Claims> verifyToken(String token) {
+    public static Jws<Claims> verifyToken(String token) {
         try {
             JwtParser parser = Jwts.parserBuilder().setSigningKey(secretKey).build();
             Jws<Claims> claimsJws = parser.parseClaimsJws(token);
@@ -99,7 +101,7 @@ public class JwtService {
         }
     }
 
-    public String getUserIdByToken(String token) {
+    public static String getUserIdByToken(String token) {
         return Objects.requireNonNull(verifyToken(token))
                 .getBody()
                 .get("id", String.class);
@@ -118,15 +120,11 @@ public class JwtService {
 //        return null;
     }
 
-    public String getUserIdByHeaderMap(Map<String, Object> headerMap) throws Exception {
+    public static String getUserIdByHeaderMap(Map<String, Object> headerMap) throws Exception {
         return Objects.requireNonNull(verifyToken(BdUtil.getTokenByHeader(headerMap)))
                 .getBody()
                 .get("id", String.class);
     }
-
-//    public Long getShopIdByHeaderMap(Map<String, Object> headerMap) {
-//        return getShopIdByUserId(getUserIdByHeaderMap(headerMap));
-//    }
 
 
 }

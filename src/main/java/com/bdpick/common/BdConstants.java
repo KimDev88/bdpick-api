@@ -26,8 +26,9 @@ public class BdConstants {
         public static final String MSG_TOKEN_IS_NOT_CORRECT = "유효하지 않은 토큰입니다.";
         public static final String MSG_TOKEN_EXPIRED = "토큰이 만료 됐습니다.";
         public static final String MSG_DUPLICATE_REGISTER = "해당 사업자 번호는 이미 가입되어있습니다.";
+        public static final String MSG_EMAIL_EXIST = "이미 사용중인 이메일입니다.";
 
-
+        public static final String MSG_DATA_DUPLICATE = "이미 등록된 데이터 입니다.";
 
         public static final String NAME_EXCEPTION_DUPLICATE_DATA = "org.hibernate.exception.ConstraintViolationException";
     }

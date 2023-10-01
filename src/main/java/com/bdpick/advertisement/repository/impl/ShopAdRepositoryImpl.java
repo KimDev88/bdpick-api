@@ -1,10 +1,11 @@
 package com.bdpick.advertisement.repository.impl;
 
 import com.bdpick.advertisement.domain.AdKeyword;
+import com.bdpick.advertisement.domain.Keyword;
 import com.bdpick.advertisement.domain.ShopAd;
 import com.bdpick.advertisement.repository.ShopAdRepository;
 import com.bdpick.common.web.rest.dto.Pageable;
-import com.bdpick.advertisement.domain.Keyword;
+import com.bdpick.shop.domain.Shop;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.reactive.stage.Stage;
@@ -33,10 +34,16 @@ public class ShopAdRepositoryImpl implements ShopAdRepository {
         // 쿼리를 위해 키워드 리스트 중 키워트 문자열만 추출
         List<String> keywordStrList = shopAd.getKeywordList()
                 .stream()
-                .map(adKeyword -> adKeyword.getKeyword().getKeyword()).toList();
+                .map(adKeyword -> adKeyword.getKeyword().getKeyword().trim())
+                .toList();
         List<Keyword> sourceKeywordList = new ArrayList<>(shopAd.getKeywordList()
                 .stream()
-                .map(AdKeyword::getKeyword)
+                .map(adKeyword -> {
+                    // 공백 제거
+                    Keyword keyword = new Keyword();
+                    keyword.setKeyword(adKeyword.getKeyword().getKeyword().trim());
+                    return keyword;
+                })
                 .toList());
 
         return session.createQuery("select k from Keyword k where k.keyword in :keywordList", Keyword.class)
@@ -82,8 +89,8 @@ public class ShopAdRepositoryImpl implements ShopAdRepository {
      * @return last created entity
      */
     public CompletionStage<ShopAd> findLastShopAd(Stage.Session session) {
-        return session.createQuery("select sa from ShopAd sa order by id desc limit 1", ShopAd.class)
-//                .setFirstResult(0)
+        return session.createQuery("select sa from ShopAd sa order by id desc", ShopAd.class)
+                .setMaxResults(1)
                 .getSingleResultOrNull();
 
     }
@@ -95,15 +102,15 @@ public class ShopAdRepositoryImpl implements ShopAdRepository {
      * @param session  session
      * @return shop ad list
      */
-    public CompletionStage<List<ShopAd>> findShopAds(Pageable pageable, @NonNull Stage.Session session) {
+    public CompletionStage<List<ShopAd>> findShopAds(Pageable pageable, @NonNull Shop shop, @NonNull Stage.Session session) {
         String sql = """
                 select ad from ShopAd ad
                         left join fetch ad.keywordList
-                        left join fetch ad.adImageList
+                        where ad.shop = :shop
                         order by ad.id asc
                 """;
         return session.createQuery(sql, ShopAd.class)
-//        return session.createQuery("select ad from Shop s inner join fetch from ShopAd ad join  on ad.shop = s order by ad.id asc", ShopAd.class)
+                .setParameter("shop", shop)
                 .setFirstResult(pageable.getOffset())
                 .setMaxResults(pageable.getSize())
                 .getResultList();

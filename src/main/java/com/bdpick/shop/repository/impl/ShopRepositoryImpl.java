@@ -8,6 +8,7 @@ import org.hibernate.reactive.stage.Stage;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -54,9 +55,15 @@ public class ShopRepositoryImpl implements ShopRepository {
         return session.createQuery("SELECT s FROM Shop s WHERE registerNumber = :registerNumber", Shop.class)
                 .setParameter("registerNumber", shop.getRegisterNumber())
                 .getSingleResultOrNull()
-                .thenApply(rtnShop -> {
-                    System.out.println("rtnShop = " + rtnShop);
-                    return rtnShop;
+                .thenCompose(rtnShop -> {
+                    if (rtnShop != null) {
+                        return Stage.fetch(rtnShop.getImageList())
+                                .thenApply(imageList -> {
+                                    rtnShop.setImageList(imageList);
+                                    return rtnShop;
+                                });
+                    }
+                    return CompletableFuture.completedStage(null);
                 });
     }
 
@@ -72,11 +79,16 @@ public class ShopRepositoryImpl implements ShopRepository {
                 .setParameter("userId", userId)
                 .getSingleResultOrNull()
                 // 이미지 리스트 lazy loading
-                .thenCompose(shop -> Stage.fetch(shop.getImageList())
-                        .thenApply(shopImages -> {
-                            shop.setImageList(shopImages);
-                            return shop;
-                        }))
+                .thenCompose(shop -> {
+                            if (shop != null) {
+                                return Stage.fetch(shop.getImageList())
+                                        .thenApply(shopImages -> {
+                                            shop.setImageList(shopImages);
+                                            return shop;
+                                        });
+                            } else return CompletableFuture.completedStage(null);
+                        }
+                )
                 .thenApply(rtnShop -> {
                     log.info("rtnShop = " + rtnShop);
                     return rtnShop;
@@ -94,10 +106,17 @@ public class ShopRepositoryImpl implements ShopRepository {
                 .setMaxResults(1)
                 .getSingleResultOrNull()
                 .thenCompose(shop ->
-                        Stage.fetch(shop.getImageList())
-                                .thenApply(imageList -> {
-                                    shop.setImageList(imageList);
-                                    return shop;
-                                }));
+                        {
+                            if (shop != null) {
+                                return Stage.fetch(shop.getImageList())
+                                        .thenApply(imageList -> {
+                                            shop.setImageList(imageList);
+                                            return shop;
+                                        });
+                            } else {
+                                return CompletableFuture.completedStage(null);
+                            }
+                        }
+                );
     }
 }

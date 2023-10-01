@@ -1,5 +1,7 @@
 package com.bdpick.advertisement.service;
 
+import com.bdpick.advertisement.service.impl.ShopAdService;
+import com.bdpick.common.security.JwtService;
 import com.bdpick.common.web.rest.dto.Pageable;
 import com.bdpick.advertisement.domain.Keyword;
 import com.bdpick.advertisement.domain.AdKeyword;
@@ -23,10 +25,7 @@ import reactor.test.StepVerifier;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -39,9 +38,11 @@ import java.util.stream.Stream;
 @SpringBootTest
 public class ShopAdServiceImplTest {
     @Autowired
-    private ShopAdServiceImpl shopAdService;
+    private ShopAdService shopAdService;
     @Autowired
     private ShopService shopService;
+    @Autowired
+    private JwtService jwtService;
 
     private Shop shop;
     private ShopAd shopAd = new ShopAd();
@@ -51,8 +52,13 @@ public class ShopAdServiceImplTest {
     private Flux<String> fileTypeFlux;
     private FilePart filePart;
 
+    Map<String, Object> headerMap = new HashMap<>();
+
+
     @BeforeEach
     public void setData() {
+        headerMap.put("authorization", "Bearer " + JwtService.createAccessToken("su2408"));
+
         // 가장 마지막에 등록된 shop 조회
         shop = shopService.selectShopIsLastCreated().block();
 
@@ -122,7 +128,6 @@ public class ShopAdServiceImplTest {
                     createdId.set(shopAd1.getId() + 1);
                 }).subscribe();
 
-        Map<String, Object> headerMap = new HashMap<>();
         // 생성된 광고가 마지막 shopAd + 1의 아이디로 생성되었는지 검증
         StepVerifier.create(shopAdService.createShopAd(headerMap, partFlux, fileTypeFlux, shopAd))
                 .expectNextMatches(shopAd1 -> shopAd1.getId().equals(createdId.get()))
@@ -134,9 +139,9 @@ public class ShopAdServiceImplTest {
      */
     @Test
     public void selectShopAdList() {
-        StepVerifier.create(shopAdService.findShopAds(new Pageable(0, 100)))
-                .expectNextMatches(item -> true)
-                .expectComplete();
+        StepVerifier.create(shopAdService.findShopAds(headerMap, new Pageable(0, 100)))
+                .thenConsumeWhile(Objects::nonNull)
+                .verifyComplete();
 
     }
 }

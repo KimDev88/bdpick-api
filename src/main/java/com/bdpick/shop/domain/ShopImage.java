@@ -4,6 +4,8 @@ import com.bdpick.shop.domain.enumeration.ShopFileType;
 import com.bdpick.common.domain.CreatedDate;
 import com.bdpick.common.domain.Image;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,11 +20,12 @@ import java.io.Serializable;
 @Data
 @Entity
 @EqualsAndHashCode(callSuper = true)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class ShopImage extends CreatedDate implements Serializable {
+
     @ManyToOne(optional = false)
     @JoinColumn(foreignKey = @ForeignKey(name = "FK_SHOP_IMAGE_SHOP_ID"))
     @ToString.Exclude
-    @JsonBackReference
     @Comment("가게 아이디")
     private Shop shop;
 

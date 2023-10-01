@@ -4,11 +4,14 @@ import com.bdpick.config.TestConfiguration;
 import com.bdpick.advertisement.domain.Keyword;
 import com.bdpick.advertisement.domain.AdKeyword;
 import com.bdpick.advertisement.domain.ShopAd;
+import com.bdpick.shop.adaptor.ShopProducerImpl;
 import com.bdpick.shop.domain.Shop;
 import com.bdpick.common.request.CommonResponse;
 import com.bdpick.advertisement.repository.impl.AdImageRepositoryImpl;
 import com.bdpick.advertisement.repository.impl.ShopAdRepositoryImpl;
 import com.bdpick.advertisement.service.ShopAdServiceImpl;
+import com.bdpick.shop.repository.impl.ShopRepositoryImpl;
+import com.bdpick.shop.service.ShopServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -42,12 +45,18 @@ public class ShopAdResourceTest {
     @SpyBean
     private ShopAdServiceImpl shopAdServiceImpl;
     @SpyBean
+    private ShopServiceImpl shopServiceImpl;
+    @SpyBean
     private ShopAdRepositoryImpl shopAdRepositoryImpl;
     @SpyBean
     private AdImageRepositoryImpl adImageRepositoryImpl;
+    @SpyBean
+    private ShopRepositoryImpl shopRepository;
+    @SpyBean
+    private ShopProducerImpl shopProducer;
 
-    Shop shop;
-    ShopAd shopAd;
+    private Shop shop;
+    private ShopAd shopAd;
 
     private WebTestClient webClient;
     Consumer<HttpHeaders> headers;
@@ -88,7 +97,7 @@ public class ShopAdResourceTest {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("files", new ClassPathResource("/META-INF/persistence.xml"));
         builder.part("fileTypes", "A1");
-        builder.part("shop", shopAd);
+        builder.part("shopAd", shopAd);
 
         webClient.post().uri(PREFIX_API_URL + "/shop-ads")
                 .headers(headers)

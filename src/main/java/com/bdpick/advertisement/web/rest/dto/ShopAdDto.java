@@ -1,12 +1,18 @@
 package com.bdpick.advertisement.web.rest.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+
+/**
+ * shop advertisement dto class
+ */
+@Getter
+@Setter
 public class ShopAdDto implements Serializable {
     private Long id;
     private Long shopId;
@@ -19,4 +25,7 @@ public class ShopAdDto implements Serializable {
     private String fileUri;
     private String keywords;
     private List<String> keywordList;
+//    private List<AdKeyword> keywordList;
+//    private List<AdImage> adImageList = new ArrayList<>();
+
 }

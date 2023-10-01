@@ -24,4 +24,7 @@ public interface ShopService {
     Mono<CommonResponse> checkRegisterNumber(Shop shop);
 
     Long getShopIdByUserId(String userId);
+
+    Long getShopIdByHeaderMap(Map<String, Object> headerMap) throws Exception;
+
 }

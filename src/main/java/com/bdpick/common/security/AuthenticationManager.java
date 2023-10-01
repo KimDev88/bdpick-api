@@ -1,6 +1,5 @@
 package com.bdpick.common.security;
 
-import com.bdpick.user.repository.impl.UserRepositoryImpl;
 import com.bdpick.user.service.impl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -13,21 +12,14 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class AuthenticationManager implements ReactiveAuthenticationManager {
 
-    private final JwtService jwtService;
-    private final UserRepositoryImpl userRepository;
     private final UserServiceImpl userService;
-
-//    public AuthenticationManager(JwtService jwtService, UserRepositoryImpl userRepository) {
-//        this.jwtService = jwtService;
-//        this.userRepository = userRepository;
-//    }
 
     @Override
     public Mono<Authentication> authenticate(Authentication authentication) {
         String authToken = authentication.getCredentials().toString();
-        String id = jwtService.getUserIdByToken(authToken);
+        String id = JwtService.getUserIdByToken(authToken);
         try {
-            jwtService.verifyToken(authToken);
+            JwtService.verifyToken(authToken);
             return userService.findById(id)
                     .map(user -> (Authentication) new UsernamePasswordAuthenticationToken(
 //                            new CustomUserPrincipal(jwtService, userRepository, user),
