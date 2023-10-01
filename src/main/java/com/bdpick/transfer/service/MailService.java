@@ -1,4 +1,4 @@
-package com.bdpick.mail.service;
+package com.bdpick.transfer.service;
 
 import java.util.List;
 

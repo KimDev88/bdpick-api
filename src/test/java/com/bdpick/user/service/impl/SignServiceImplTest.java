@@ -1,6 +1,6 @@
 package com.bdpick.user.service.impl;
 
-import com.bdpick.mail.service.impl.MailServiceImpl;
+import com.bdpick.transfer.service.impl.MailServiceImpl;
 import com.bdpick.common.security.JwtService;
 import com.bdpick.user.web.rest.mapper.UserMapper;
 import com.bdpick.user.domain.User;

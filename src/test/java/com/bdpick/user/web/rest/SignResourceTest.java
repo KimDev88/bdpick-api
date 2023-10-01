@@ -1,6 +1,6 @@
 package com.bdpick.user.web.rest;
 
-import com.bdpick.mail.service.impl.MailServiceImpl;
+import com.bdpick.transfer.service.impl.MailServiceImpl;
 import com.bdpick.common.security.JwtService;
 import com.bdpick.config.TestConfiguration;
 import com.bdpick.user.web.rest.dto.Token;

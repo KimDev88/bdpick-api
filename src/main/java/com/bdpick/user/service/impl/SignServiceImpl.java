@@ -1,6 +1,6 @@
 package com.bdpick.user.service.impl;
 
-import com.bdpick.mail.service.impl.MailServiceImpl;
+import com.bdpick.transfer.service.impl.MailServiceImpl;
 import com.bdpick.common.security.JwtService;
 import com.bdpick.user.web.rest.dto.SignInDto;
 import com.bdpick.user.web.rest.dto.Token;
@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

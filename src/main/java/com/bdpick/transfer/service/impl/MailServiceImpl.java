@@ -1,6 +1,6 @@
-package com.bdpick.mail.service.impl;
+package com.bdpick.transfer.service.impl;
 
-import com.bdpick.mail.service.MailService;
+import com.bdpick.transfer.service.MailService;
 import io.vertx.core.Vertx;
 import io.vertx.ext.mail.MailClient;
 import io.vertx.ext.mail.MailConfig;

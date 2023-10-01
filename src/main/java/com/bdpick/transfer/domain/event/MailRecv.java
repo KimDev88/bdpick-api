@@ -1,9 +1,7 @@
-package com.bdpick.mail.domain.event;
+package com.bdpick.transfer.domain.event;
 
 import com.bdpick.user.domain.enumeration.EmailType;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * 메일 발송됨

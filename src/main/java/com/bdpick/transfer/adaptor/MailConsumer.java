@@ -1,8 +1,7 @@
-package com.bdpick.mail.adaptor;
+package com.bdpick.transfer.adaptor;
 
-import com.bdpick.mail.domain.event.MailRecv;
-import com.bdpick.mail.service.MailService;
-import com.bdpick.user.domain.event.MailSent;
+import com.bdpick.transfer.domain.event.MailRecv;
+import com.bdpick.transfer.service.MailService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;

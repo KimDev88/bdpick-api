@@ -1,6 +1,6 @@
 package com.bdpick.user.adaptor;
 
-import com.bdpick.mail.adaptor.MailConsumer;
+import com.bdpick.transfer.adaptor.MailConsumer;
 import com.bdpick.user.domain.enumeration.EmailType;
 import com.bdpick.user.domain.event.*;
 import com.fasterxml.jackson.core.JsonProcessingException;

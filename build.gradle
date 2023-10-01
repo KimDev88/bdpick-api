@@ -57,6 +57,9 @@ dependencies {
     implementation 'io.vertx:vertx-mysql-client:4.4.5'
 //    implementation 'cz.encircled:joiner-reactive:0.4.7'
 
+    // fcm
+    implementation 'com.google.firebase:firebase-admin:9.2.0'
+
     // kafka
     implementation 'org.springframework.kafka:spring-kafka:3.0.11'
 
